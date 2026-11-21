@@ -85,7 +85,7 @@ export function HeroCarousel() {
         >
           St. Thomas&rsquo; College
           <span className="mt-1 block">
-            <span className="text-gradient-gold">Matale</span>
+            <span className="text-gradient-navy text-luxe-shadow">Matale</span>
           </span>
         </motion.h1>
 

@@ -179,8 +179,8 @@ export function Header() {
 
             <NotificationBell />
 
-            {/* Account */}
-            <div className="relative">
+            {/* Account — hidden on mobile/tablet (lives in the drawer) */}
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setAccountOpen((o) => !o)}
                 className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5"
@@ -245,10 +245,10 @@ export function Header() {
               </AnimatePresence>
             </div>
 
-            {/* Favorites */}
+            {/* Favorites — hidden on mobile/tablet (lives in the drawer) */}
             <Link
               href="/favorites"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5"
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 sm:flex"
               aria-label="Favorites"
             >
               <Heart className="h-[18px] w-[18px]" />
@@ -259,10 +259,10 @@ export function Header() {
               )}
             </Link>
 
-            {/* Cart */}
+            {/* Cart — hidden on mobile/tablet (lives in the drawer) */}
             <button
               onClick={openCart}
-              className="relative flex h-10 items-center gap-1.5 rounded-full px-2.5 text-ink transition-colors hover:bg-ink/5"
+              className="relative hidden h-10 items-center gap-1.5 rounded-full px-2.5 text-ink transition-colors hover:bg-ink/5 sm:flex"
               aria-label="Open cart"
             >
               <ShoppingBag className="h-5 w-5" />
@@ -339,45 +339,69 @@ export function Header() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="block border-b border-ink/8 py-3 text-lg text-ink"
+                      className="block border-b border-ink/8 py-3.5 text-lg font-medium text-ink"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
 
-                {/* Shop submenu */}
-                <li className="pt-2 pb-1 pl-4 text-[11px] uppercase tracking-wide-2 text-stone-400">
-                  Shop
-                </li>
-                <li className="pl-4">
-                  <Link
-                    href="/shop?category=Clothing"
-                    className="block border-b border-ink/8 py-3 text-base text-ink/85"
-                  >
-                    Merchandises
-                  </Link>
-                </li>
-                <li className="pl-4">
-                  <Link
-                    href="/shop?category=Shoes"
-                    className="block border-b border-ink/8 py-3 text-base text-ink/85"
-                  >
-                    Event Tickets
-                  </Link>
-                </li>
-
-                <li className="pt-4 text-[11px] uppercase tracking-wide-2 text-stone-400">
-                  Account
+                <li className="pt-6 pb-1 text-[11px] uppercase tracking-wide-2 text-stone-400">
+                  My account
                 </li>
                 <li>
                   <Link
                     href={user ? "/account" : "/account/login"}
-                    className="block border-b border-ink/8 py-3 text-lg text-ink"
+                    className="flex items-center gap-3 border-b border-ink/8 py-3.5 text-base text-ink"
                   >
+                    <UserIcon className="h-[18px] w-[18px] text-stone-400" />
                     {user ? "My orders" : "Sign in"}
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/favorites"
+                    className="flex items-center gap-3 border-b border-ink/8 py-3.5 text-base text-ink"
+                  >
+                    <Heart className="h-[18px] w-[18px] text-stone-400" />
+                    Favourites
+                    {favCount > 0 && (
+                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-wine px-1.5 text-[10px] font-semibold text-paper">
+                        {favCount}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      openCart();
+                    }}
+                    className="flex w-full items-center gap-3 border-b border-ink/8 py-3.5 text-left text-base text-ink"
+                  >
+                    <ShoppingBag className="h-[18px] w-[18px] text-stone-400" />
+                    Bag
+                    {itemCount > 0 && (
+                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-bronze px-1.5 text-[10px] font-semibold text-paper">
+                        {itemCount}
+                      </span>
+                    )}
+                  </button>
+                </li>
+                {user && (
+                  <li>
+                    <button
+                      onClick={async () => {
+                        await fetch("/api/auth/logout", { method: "POST" });
+                        window.location.href = "/";
+                      }}
+                      className="flex w-full items-center gap-3 py-3.5 text-left text-base text-wine"
+                    >
+                      Sign out
+                    </button>
+                  </li>
+                )}
               </ul>
             </motion.nav>
           </motion.div>

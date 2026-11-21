@@ -2,6 +2,13 @@
 
 import Link from "next/link";
 import { SchoolCrest } from "@/components/layout/school-crest";
+import {
+  InstagramGlyph,
+  XGlyph,
+  ThreadsGlyph,
+  FacebookGlyph,
+  YoutubeGlyph,
+} from "@/components/layout/social-glyphs";
 
 export function Footer() {
   return (
@@ -26,15 +33,23 @@ export function Footer() {
             The official store of St. Thomas&apos; College, Matale — college
             merchandises and event tickets for Thomians, parents and old boys.
           </p>
-          <div className="mt-6 flex gap-3">
-            {["IG", "PIN", "TT"].map((s) => (
+          <div className="mt-6 flex flex-wrap gap-3">
+            {[
+              { href: "https://instagram.com", label: "Instagram", Glyph: InstagramGlyph },
+              { href: "https://x.com", label: "X", Glyph: XGlyph },
+              { href: "https://threads.net", label: "Threads", Glyph: ThreadsGlyph },
+              { href: "https://facebook.com", label: "Facebook", Glyph: FacebookGlyph },
+              { href: "https://youtube.com", label: "YouTube", Glyph: YoutubeGlyph },
+            ].map(({ href, label, Glyph }) => (
               <a
-                key={s}
-                href="/"
-                aria-label={s}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-paper/20 text-[10px] font-medium text-paper/70 transition-colors hover:border-gold hover:text-gold"
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="group flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0f141f] ring-1 ring-black/10 transition-all duration-500 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_10px_24px_-10px_rgba(255,255,255,0.45)]"
               >
-                {s}
+                <Glyph className="h-[19px] w-[19px] transition-colors duration-500 group-hover:text-[#0a0b0f]" />
               </a>
             ))}
           </div>
@@ -80,7 +95,6 @@ export function Footer() {
       <div className="border-t border-paper/10">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-6 py-6 text-xs text-paper/50 lg:flex-row lg:px-10">
           <p>© {new Date().getFullYear()} St. Thomas&apos; College, Matale. All rights reserved.</p>
-          <p className="italic">&ldquo;Animo Et Fide&rdquo; — Courage &amp; Faith</p>
         </div>
       </div>
     </footer>
