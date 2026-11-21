@@ -18,21 +18,75 @@ adapted from the Nova storefront.
 
 ## Getting started
 
+### 1. Get a Postgres database
+
+The app needs a Postgres connection string. Two easy options:
+
+**Neon** (free) — [neon.tech](https://neon.tech) → create a project → copy the
+connection string.
+
+**Supabase** (free) — [supabase.com](https://supabase.com) → Project Settings →
+Database → Connection string → **URI**.
+
+Supabase notes:
+
+- The direct host (`db.<ref>.supabase.co`) is **IPv6-only**. On networks
+  without IPv6 use the **pooler** host instead:
+  `aws-0-<region>.pooler.supabase.com:5432`.
+- The pooler username carries the tenant id: `postgres.<project-ref>`.
+- URL-encode any special characters in the password — `@` becomes `%40`.
+
+### 2. Configure the environment
+
 ```bash
-npm install
-cp .env.example .env             # then fill in the values
-npx drizzle-kit push             # create all tables
-npx tsx src/db/seed.ts           # collections, products, reviews
-npx tsx src/db/seed-variants.ts  # size/colour variants with per-variant stock
-npm run build && npm run start
+cp .env.example .env      # then fill in the values
 ```
+
+### 3. Create the tables
+
+```bash
+npx drizzle-kit push      # creates all 10 tables from src/db/schema.ts
+```
+
+### 4. Seed demo data
+
+```bash
+npx tsx src/db/seed.ts            # 5 collections, 17 products, ~72 reviews
+npx tsx src/db/seed-variants.ts   # 204 size/colour variants with per-variant stock
+```
+
+Then give the collections a cover image (the seed script leaves them null):
+
+```sql
+update collections set image = (select images[1] from products where id = 2)  where slug = 'new-arrivals';
+update collections set image = (select images[1] from products where id = 9)  where slug = 'essentials';
+update collections set image = (select images[1] from products where id = 4)  where slug = 'tailoring';
+update collections set image = (select images[1] from products where id = 15) where slug = 'footwear';
+update collections set image = (select images[1] from products where id = 11) where slug = 'outerwear';
+```
+
+(Add the two category rows the seed script skips: `Clothing`, `Shoes`.)
+
+### 5. Run it
+
+```bash
+npm run build && npm run start    # or: npm run dev
+```
+
+Sign into the admin panel at `/admin/login` with `ADMIN_USERNAME` /
+`ADMIN_PASSWORD`.
+
+> **Note:** the database is not part of the repository. Cloning the repo gives
+> you the schema and seed scripts, not the data — each environment has its own
+> database and its own data.
 
 ## Environment variables
 
 | Key | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Local Postgres connection string |
-| `POSTGRES_URL` | Neon/Vercel Postgres connection string (enables the serverless driver) |
+| `DATABASE_URL` | Postgres connection string (local, Neon or Supabase) |
+| `POSTGRES_URL` | Neon/Vercel Postgres string — switches the driver to `neon-serverless` |
+| `STRIPE_SECRET_KEY` | Optional — enables the Stripe checkout route |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin panel credentials |
 | `JWT_SECRET` | Signs admin + customer session tokens |
 | `STRIPE_SECRET_KEY` | Optional — enables the Stripe checkout route |
