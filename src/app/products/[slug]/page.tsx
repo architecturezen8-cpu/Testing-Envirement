@@ -408,6 +408,23 @@ function ProductPageInner() {
                 </div>
               )}
 
+              {/* School size guide — helps parents pick by grade, not by guesswork */}
+              {!isTicket && (product.category === "Uniforms" || product.category === "Ties") && (
+                <div className="mt-6 rounded-xl border border-ink/10 bg-cream/60 p-5">
+                  <p className="text-[11px] uppercase tracking-wide-2 text-ink">
+                    Which size do I need?
+                  </p>
+                  <ul className="mt-3 grid gap-1.5 text-[13px] text-stone-500 sm:grid-cols-2">
+                    <li>Grade 1 – 2 · size 24–26</li>
+                    <li>Grade 3 – 5 · size 28–30</li>
+                    <li>Grade 6 – 9 · size 30–32</li>
+                    <li>Grade 10 – 11 · size 32–34</li>
+                    <li>Grade 12 – 13 · size 34–36</li>
+                    <li>Staff &amp; old boys · size 36+</li>
+                  </ul>
+                </div>
+              )}
+
               {/* Stock status — variant aware */}
               <div className="mt-7 flex items-center gap-2">
                 <span
@@ -626,7 +643,7 @@ function ProductPageInner() {
             <div className="mb-10">
               <p className="text-xs uppercase tracking-wide-2 text-bronze">Complete the look</p>
               <h2 className="mt-2 font-serif text-4xl font-light text-ink">
-                You may also like
+                Students also bought
               </h2>
             </div>
           </AnimatedSection>

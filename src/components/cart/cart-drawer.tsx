@@ -88,7 +88,7 @@ export function CartDrawer() {
                   <ShoppingBag className="h-7 w-7 text-stone-400" />
                 </div>
                 <div>
-                  <p className="font-serif text-lg text-ink">Your bag is empty</p>
+                  <p className="font-serif text-lg text-ink">Your order is empty</p>
                   <p className="mt-1 text-sm text-stone-500">Discover pieces worth keeping.</p>
                 </div>
                 <Link
@@ -187,7 +187,7 @@ export function CartDrawer() {
                     onClick={closeCart}
                     className="mt-2 w-full py-2 text-center text-xs uppercase tracking-wide-2 text-stone-500 transition-colors hover:text-ink"
                   >
-                    Continue shopping
+                    Back to the college store
                   </button>
                 </div>
               </>

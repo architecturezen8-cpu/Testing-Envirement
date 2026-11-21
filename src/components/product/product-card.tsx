@@ -119,7 +119,7 @@ export function ProductCard({ product, className, onQuickView }: ProductCardProp
         <div className="mt-3.5 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wide-2 text-stone-500">
-              {product.gender} · {product.category}
+              {product.category}
             </p>
             <h3 className={cn(
               "mt-1 font-serif text-[17px] leading-snug text-ink transition-colors group-hover:text-bronze line-clamp-2 min-h-[2.6rem]",

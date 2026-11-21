@@ -178,12 +178,12 @@ function ShopPageInner() {
 
       <div>
         <h3 className="text-[11px] font-medium uppercase tracking-wide-2 text-ink">
-          Gender
+          Who&apos;s it for
         </h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {genders.map((g) => (
             <button
-              key={g}
+              key={g === "Boys" ? "Boys' uniform" : g === "Girls" ? "Girls' uniform" : "All students"}
               onClick={() =>
                 updateFilter("gender", filters.gender === g ? "" : g)
               }
@@ -193,7 +193,7 @@ function ShopPageInner() {
                   : "border-ink/15 text-ink/70 hover:border-ink/40"
               }`}
             >
-              {g}
+              {g === "Boys" ? "Boys\u2019 uniform" : g === "Girls" ? "Girls\u2019 uniform" : "All students"}
             </button>
           ))}
         </div>

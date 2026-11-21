@@ -49,7 +49,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h4 className="text-[11px] uppercase tracking-wide-2 text-paper/40">Shop</h4>
+          <h4 className="text-[11px] uppercase tracking-wide-2 text-paper/40">College store</h4>
           <ul className="mt-4 space-y-2.5 text-sm text-paper/70">
             <li><Link href="/shop" className="transition-colors hover:text-paper">All Products</Link></li>
             <li><Link href="/shop?category=Clothing" className="transition-colors hover:text-paper">Clothing</Link></li>
@@ -69,7 +69,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h4 className="text-[11px] uppercase tracking-wide-2 text-paper/40">The House</h4>
+          <h4 className="text-[11px] uppercase tracking-wide-2 text-paper/40">The College</h4>
           <ul className="mt-4 space-y-2.5 text-sm text-paper/70">
             <li><span className="text-paper/70">We ship worldwide</span></li>
             <li><span className="text-paper/70">Free returns within 30 days</span></li>

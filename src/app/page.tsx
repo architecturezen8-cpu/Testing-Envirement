@@ -6,6 +6,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { ProductCard } from "@/components/product/product-card";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 import { HeroCarousel } from "@/components/home/hero-carousel";
+import { SchoolCrest } from "@/components/layout/school-crest";
 
 export const dynamic = "force-dynamic";
 
@@ -55,13 +56,61 @@ export default async function HomePage() {
       {/* ===== HERO — cinematic college imagery ===== */}
       <HeroCarousel />
 
+      {/* ===== SHOP BY HOUSE ===== */}
+      <section className="mx-auto max-w-[1400px] px-6 pb-4 pt-20 lg:px-10 lg:pt-28">
+        <AnimatedSection>
+          <div className="mb-10 text-center">
+            <p className="text-[11px] uppercase tracking-luxe text-accent">Inter-house</p>
+            <h2 className="mt-4 font-serif text-[clamp(2rem,4vw,3.25rem)] font-light leading-tight text-ink">
+              Shop your house
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-stone-500">
+              Austin, Bede, Pius and Clement — pick up your house badge and wear
+              your colours at the next inter-house meet.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { house: "Austin", colour: "#1e3a6e", motto: "Fortiter et Fideliter" },
+            { house: "Bede", colour: "#5f2229", motto: "Scientia et Sapientia" },
+            { house: "Pius", colour: "#1f5136", motto: "Pietas et Veritas" },
+            { house: "Clement", colour: "#7a5a1a", motto: "Constantia et Labore" },
+          ].map((h) => (
+            <StaggerItem key={h.house} className="h-full">
+              <Link
+                href={`/shop?q=${encodeURIComponent(`${h.house} House`)}`}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel transition-shadow duration-700 hover:shadow-navy-hover"
+              >
+                <div className="flex h-24 items-center justify-center" style={{ backgroundColor: h.colour }}>
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 ring-1 ring-black/10">
+                    <SchoolCrest className="h-9 w-9 text-navy" />
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="font-serif text-2xl text-ink">{h.house} House</h3>
+                  <p className="mt-1.5 flex-1 text-sm italic leading-relaxed text-stone-500">
+                    {h.motto}
+                  </p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-wide-2 text-accent transition-all duration-500 group-hover:gap-3.5">
+                    Shop {h.house}
+                    <span>→</span>
+                  </span>
+                </div>
+              </Link>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      </section>
+
       {/* ===== FEATURED COLLECTIONS (Editorial) ===== */}
       <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-10 lg:py-32">
         <AnimatedSection>
           <div className="mb-14 text-center">
-            <p className="text-[11px] uppercase tracking-luxe text-accent">Explore</p>
+            <p className="text-[11px] uppercase tracking-luxe text-accent">College store</p>
             <h2 className="mt-4 font-serif text-[clamp(2rem,4vw,3.5rem)] font-light leading-tight text-ink text-balance">
-              The collections
+              Everything a Thomian needs
             </h2>
             <div className="mx-auto mt-6 h-px w-16 bg-accent/50" />
           </div>
@@ -88,7 +137,7 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
                 <div className="relative z-10 p-7 text-paper">
                   <p className="text-[10px] uppercase tracking-luxe text-paper/50">
-                    {idx === 0 ? "Signature edit" : "Collection"}
+                    "College store"
                   </p>
                   <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">
                     {collection.name}
@@ -99,7 +148,7 @@ export default async function HomePage() {
                     </p>
                   )}
                   <span className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-wide-2 text-paper/90 transition-all duration-500 group-hover:gap-4">
-                    Discover
+                    Shop now
                     <span>→</span>
                   </span>
                 </div>
@@ -115,9 +164,9 @@ export default async function HomePage() {
           <AnimatedSection>
             <div className="mb-14 flex items-end justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-luxe text-accent">College picks</p>
+                <p className="text-[11px] uppercase tracking-luxe text-accent">Most popular</p>
                 <h2 className="mt-4 font-serif text-[clamp(2rem,4vw,3.5rem)] font-light text-ink">
-                  Featured pieces
+                  Uniforms &amp; college kit
                 </h2>
               </div>
               <Link
