@@ -3,76 +3,84 @@ import type { SVGProps } from "react";
 /**
  * Brand glyphs for the footer.
  *
- * lucide-react no longer ships social/brand icons, so these are hand-drawn
- * inline vectors. They inherit `currentColor`, which lets the footer swap
- * white → black on hover simply by changing the text colour.
+ * Every glyph is drawn as a **stroke-only outline** — no filled shapes — so
+ * the mark reads as a line drawing inside its circular button. Because they
+ * use `stroke="currentColor"`, the footer can render them white and flip the
+ * stroke to black simply by changing the text colour on hover.
  */
 
 type IconProps = SVGProps<SVGSVGElement>;
 
+/** Shared defaults so every glyph stays visually consistent. */
+const base: IconProps = {
+  fill: "none",
+  xmlns: "http://www.w3.org/2000/svg",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+};
+
 export function InstagramGlyph(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <rect
-        x="3"
-        y="3"
-        width="18"
-        height="18"
-        rx="5.2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <circle cx="12" cy="12" r="4.1" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="17.2" cy="6.9" r="1.25" fill="currentColor" />
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.4" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="12" r="4.15" stroke="currentColor" strokeWidth="1.7" />
+      {/* lens dot stays an outline too */}
+      <circle cx="17.15" cy="6.85" r="1.05" stroke="currentColor" strokeWidth="1.4" />
     </svg>
   );
 }
 
 export function XGlyph(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <path d="M17.53 3h3.02l-6.6 7.54L21.75 21h-5.47l-4.28-5.6L7.06 21H4.04l7.06-8.07L3.75 3h5.6l3.87 5.12L17.53 3Zm-1.06 16.2h1.67L7.62 4.72H5.83L16.47 19.2Z" />
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path
+        d="M4.4 3.6h4.1l4 5.3 4.5-5.3h2.6l-5.8 6.8L20.2 20.4h-4.1l-4.2-5.6-4.8 5.6H4.5l6.1-7.1L4.4 3.6Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
     </svg>
   );
 }
 
 export function ThreadsGlyph(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      {/* outer curve of the "a" */}
       <path
-        d="M12.2 21.5c-2.5 0-4.45-.83-5.8-2.46C5.1 17.48 4.4 15.28 4.4 12.6c0-2.72.7-4.9 2.03-6.5C7.8 4.45 9.76 3.6 12.2 3.6c2.36 0 4.2.75 5.5 2.23.98 1.12 1.6 2.55 1.86 4.25l-1.86.44c-.42-2.62-1.9-4.06-5.5-4.06-1.9 0-3.36.6-4.34 1.79-.95 1.15-1.44 2.83-1.44 4.99 0 2.13.49 3.79 1.45 4.94.98 1.17 2.44 1.77 4.33 1.77 1.75 0 3.05-.5 3.87-1.48.6-.72.86-1.6.86-2.4 0-.5-.1-.96-.28-1.34.3-.07.6-.17.9-.3.44-.19.83-.44 1.17-.75.6.85.94 1.92.94 3.1 0 1.42-.5 2.72-1.44 3.66-1.2 1.2-2.96 1.86-5.12 1.86Z"
+        d="M12.6 20.9c-2.3 0-4.05-.78-5.3-2.33C6.1 17.05 5.5 14.98 5.5 12.4c0-2.6.62-4.68 1.87-6.2C8.6 4.6 10.35 3.85 12.6 3.85c2.2 0 3.9.7 5.08 2.1.86 1.02 1.42 2.3 1.68 3.83"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="1.7"
       />
+      {/* inner bowl */}
       <path
-        d="M15.1 12.9c-2.13 0-3.6.72-3.6 1.98 0 1.1 1.05 1.79 2.72 1.79 1.5 0 2.72-.72 3.3-1.9.22-.45.35-.94.38-1.45-.87-.28-1.8-.42-2.8-.42Z"
-        fill="currentColor"
+        d="M9.4 12.4c0 2.4 1.4 3.9 3.5 3.9 1.9 0 3.3-1.15 3.85-3.05.3-1.05.4-2.2.36-3.45-.86-.5-1.94-.78-3.2-.78-2.6 0-4.5 1.28-4.5 3.38Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
       />
+      {/* hook descending from the bowl */}
+      <path d="M16.6 13.7c.35 1.9.05 4.15-1.9 5.6" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   );
 }
 
 export function FacebookGlyph(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <path d="M13.6 21v-7.9h2.66l.4-3.09H13.6V8.03c0-.89.25-1.5 1.53-1.5h1.63V3.78c-.28-.04-1.25-.12-2.38-.12-2.35 0-3.96 1.44-3.96 4.08v2.27H7.75v3.09h2.67V21h3.18Z" />
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path
+        d="M14.8 20.6v-6.9h2.4l.4-2.85h-2.8V9.05c0-.82.24-1.38 1.42-1.38h1.5V5.15c-.26-.03-1.15-.1-2.18-.1-2.16 0-3.64 1.32-3.64 3.74v2.06H9.5v2.85h2.44v6.9h2.86Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
     </svg>
   );
 }
 
 export function YoutubeGlyph(props: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <rect
-        x="2.6"
-        y="5.4"
-        width="18.8"
-        height="13.2"
-        rx="4.2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path d="M10.2 9.3l5 2.7-5 2.7V9.3Z" fill="currentColor" />
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <rect x="2.7" y="5.5" width="18.6" height="13" rx="4.3" stroke="currentColor" strokeWidth="1.7" />
+      {/* play triangle as an outline */}
+      <path d="M10.4 9.5l4.6 2.5-4.6 2.5v-5Z" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   );
 }

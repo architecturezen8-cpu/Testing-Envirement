@@ -179,8 +179,8 @@ export function Header() {
 
             <NotificationBell />
 
-            {/* Account — hidden on mobile/tablet (lives in the drawer) */}
-            <div className="relative hidden sm:block">
+            {/* Account — desktop only; mobile & tablet use the drawer */}
+            <div className="relative hidden lg:block">
               <button
                 onClick={() => setAccountOpen((o) => !o)}
                 className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5"
@@ -248,7 +248,7 @@ export function Header() {
             {/* Favorites — hidden on mobile/tablet (lives in the drawer) */}
             <Link
               href="/favorites"
-              className="relative hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 sm:flex"
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 lg:flex"
               aria-label="Favorites"
             >
               <Heart className="h-[18px] w-[18px]" />
@@ -262,7 +262,7 @@ export function Header() {
             {/* Cart — hidden on mobile/tablet (lives in the drawer) */}
             <button
               onClick={openCart}
-              className="relative hidden h-10 items-center gap-1.5 rounded-full px-2.5 text-ink transition-colors hover:bg-ink/5 sm:flex"
+              className="relative hidden h-10 items-center gap-1.5 rounded-full px-2.5 text-ink transition-colors hover:bg-ink/5 lg:flex"
               aria-label="Open cart"
             >
               <ShoppingBag className="h-5 w-5" />
@@ -343,6 +343,23 @@ export function Header() {
                     >
                       {link.label}
                     </Link>
+
+                    {/* Sub-navigation sits *inside* its parent, indented —
+                        only Shop has children. */}
+                    {link.children && (
+                      <ul className="pb-2 pl-5">
+                        {link.children.map((child) => (
+                          <li key={child.label}>
+                            <Link
+                              href={child.href}
+                              className="block border-l-2 border-ink/12 py-2.5 pl-4 text-[15px] text-ink/75 transition-colors hover:border-accent hover:text-ink"
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
 

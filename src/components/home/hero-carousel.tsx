@@ -81,7 +81,7 @@ export function HeroCarousel() {
         {/* Row 2 — the college name */}
         <motion.h1
           {...rise(0.24)}
-          className="mt-6 max-w-5xl font-serif text-[clamp(2.5rem,6.6vw,5.4rem)] font-bold leading-[1.02] tracking-[-0.015em] text-paper text-luxe-shadow"
+          className="mt-6 max-w-5xl font-serif text-[clamp(2rem,6vw,5.4rem)] font-bold leading-[1.02] tracking-[-0.015em] text-paper text-luxe-shadow sm:mt-7 sm:text-[clamp(2.5rem,6.6vw,5.4rem)]"
         >
           St. Thomas&rsquo; College
           <span className="mt-1 block">
@@ -98,7 +98,7 @@ export function HeroCarousel() {
         {/* Row 3 — Shop (completes the sentence, flanked by hairlines) */}
         <motion.p
           {...rise(0.44)}
-          className="mt-7 flex items-center gap-4 text-[15px] font-semibold uppercase tracking-[0.4em] text-paper/90 sm:text-lg"
+          className="mt-6 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.34em] text-paper/90 sm:mt-7 sm:gap-4 sm:text-lg sm:tracking-[0.4em]"
         >
           <span className="h-px w-6 bg-gradient-to-r from-transparent to-paper/45 sm:w-9" />
           Shop
@@ -106,13 +106,13 @@ export function HeroCarousel() {
         </motion.p>
 
         {/* Featured CTA — the single gold action */}
-        <motion.div {...rise(0.58)} className="mt-9">
+        <motion.div {...rise(0.58)} className="mt-8 w-full px-2 sm:mt-9 sm:w-auto sm:px-0">
           <Link
             href="/shop"
-            className="group inline-flex items-center gap-3.5 rounded-full bg-cta-accent px-9 py-4 text-[11px] font-bold uppercase tracking-[0.22em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover sm:px-11 sm:py-[18px] sm:text-xs"
+            className="group flex w-full items-center justify-center gap-3 rounded-full bg-cta-accent px-8 py-5 text-[15px] font-extrabold uppercase tracking-[0.16em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover sm:inline-flex sm:w-auto sm:gap-3.5 sm:px-11 sm:py-[17px] sm:text-[12.5px] sm:font-bold sm:tracking-[0.22em]"
           >
             Explore the store
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-ink/15 transition-transform duration-500 group-hover:translate-x-1">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-ink/15 text-[15px] transition-transform duration-500 group-hover:translate-x-1 sm:h-5 sm:w-5 sm:text-xs">
               →
             </span>
           </Link>
