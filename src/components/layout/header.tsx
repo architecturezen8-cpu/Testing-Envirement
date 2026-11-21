@@ -57,6 +57,11 @@ export function Header() {
     setShopOpen(false);
   }, [pathname]);
 
+  // Collapse the Shop dropdown when the drawer is dismissed.
+  useEffect(() => {
+    if (!mobileOpen) setShopOpen(false);
+  }, [mobileOpen]);
+
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
     router.push(query.trim() ? `/shop?q=${encodeURIComponent(query)}` : "/shop");
@@ -335,33 +340,59 @@ export function Header() {
               </form>
 
               <ul className="mt-6 space-y-1">
-                {navLinks.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="block border-b border-ink/8 py-3.5 text-lg font-medium text-ink"
-                    >
-                      {link.label}
-                    </Link>
+                {navLinks.map((link) =>
+                  link.children ? (
+                    // ---- Shop: collapsible dropdown ----
+                    <li key={link.label} className="border-b border-ink/8">
+                      <button
+                        onClick={() => setShopOpen((o) => !o)}
+                        aria-expanded={shopOpen}
+                        className="flex w-full items-center justify-between py-3.5 text-left text-lg font-medium text-ink"
+                      >
+                        {link.label}
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 shrink-0 text-stone-400 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                            shopOpen && "rotate-180 text-accent",
+                          )}
+                        />
+                      </button>
 
-                    {/* Sub-navigation sits *inside* its parent, indented —
-                        only Shop has children. */}
-                    {link.children && (
-                      <ul className="pb-2 pl-5">
-                        {link.children.map((child) => (
-                          <li key={child.label}>
-                            <Link
-                              href={child.href}
-                              className="block border-l-2 border-ink/12 py-2.5 pl-4 text-[15px] text-ink/75 transition-colors hover:border-accent hover:text-ink"
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
+                      <AnimatePresence initial={false}>
+                        {shopOpen && (
+                          <motion.ul
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            {link.children.map((child) => (
+                              <li key={child.label} className="pb-1 pl-5">
+                                <Link
+                                  href={child.href}
+                                  className="block border-l-2 border-ink/12 py-2.5 pl-4 text-[15px] text-ink/75 transition-colors hover:border-accent hover:text-ink"
+                                >
+                                  {child.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </li>
+                  ) : (
+                    // ---- Simple top-level links ----
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        className="block border-b border-ink/8 py-3.5 text-lg font-medium text-ink"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  )
+                )}
 
                 <li className="pt-6 pb-1 text-[11px] uppercase tracking-wide-2 text-stone-400">
                   My account
