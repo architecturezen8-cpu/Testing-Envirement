@@ -1,0 +1,437 @@
+@import "tailwindcss";
+
+@theme {
+  /* Single clean sans throughout — no display/serif faces.
+     `font-serif` is kept as an alias so legacy markup stays neutral. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* =========================================================
+     NOVA — Midnight theme
+     Base: lifted charcoal-slate (black with a cool grey/white
+     mix, so the page is not pitch black). Accent: dark navy in
+     radial / linear gradients, used sparingly.
+     ========================================================= */
+
+  /* Core surfaces */
+  --color-base: #0f141f; /* page canvas — charcoal, not pure black */
+  --color-surface: #171e2c; /* card / panel surface */
+  --color-surface-2: #1e2637; /* elevated surface */
+  --color-navy: #182740; /* the navy accent */
+  --color-navy-deep: #111c30;
+  --color-navy-glow: #2a4a7a;
+
+  /* Legacy token names kept so the whole app flips at once.
+     `paper` = light foreground (headings / on-dark labels)
+     `ink`   = slightly dimmer light foreground (body text, hairlines) */
+  --color-paper: #f6f8fb;
+  --color-cream: #1b2334; /* inputs / tinted panels */
+  --color-sand: #232c3e; /* chips / elevated panels */
+  --color-ink: #e9edf4;
+
+  /* Accents */
+  --color-stone-luxe: #8b95a9;
+  /* bronze / wine stay dark because they are used as badge *backgrounds*
+     under light text; their text roles are re-mapped in the overrides below */
+  --color-bronze: #8a6f47;
+  --color-gold: #c9a86e;
+  --color-wine: #5f2229;
+
+  /* Featured premium accent — reserved for primary buttons only.
+     Text that sits on it uses --color-accent-ink for contrast. */
+  --color-accent: #f4be38;
+  --color-accent-deep: #e0a922;
+  --color-accent-ink: #0a0b0f;
+
+  /* Status ramp tuned for a black / navy canvas */
+  --color-red-50: #2a1215;
+  --color-red-100: #331619;
+  --color-red-200: #52262c;
+  --color-red-500: #e04b52;
+  --color-red-600: #f26b71;
+  --color-red-700: #ff9296;
+  --color-green-50: #0c2317;
+  --color-green-100: #0f2c1c;
+  --color-green-200: #1d5034;
+  --color-green-500: #3ecf8e;
+  --color-green-600: #5bd69f;
+  --color-green-700: #86e7bb;
+  --color-amber-50: #2a1d08;
+  --color-amber-100: #34240b;
+  --color-amber-200: #5f4013;
+  --color-amber-500: #f0b33f;
+  --color-amber-600: #f6bf55;
+  --color-amber-700: #ffd27f;
+  --color-blue-500: #6ea8ff;
+  --color-blue-700: #9dc6ff;
+
+  /* Neutralize Tailwind's warm stone ramp so the admin panel reads
+     as black + navy instead of warm grey. */
+  --color-stone-50: #1a2231;
+  --color-stone-100: #222b3c;
+  --color-stone-200: #2f3b50;
+  --color-stone-300: #3d4b63;
+  --color-stone-400: #7c8aa3;
+  --color-stone-500: #97a4ba;
+  --color-stone-600: #b2bdd0;
+  --color-stone-700: #ccd4e2;
+  --color-stone-800: #e4e9f2;
+  --color-stone-900: #f0f3f8;
+  /* stone-950 = navy accent surface (primary admin buttons / active nav) */
+  --color-stone-950: #1e3050;
+
+  --animate-marquee: marquee 36s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kenburns {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.12) translate(-1.5%, -1%); }
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes lineGrow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-base);
+  color: var(--color-ink);
+}
+
+/* Ambience: restrained navy radial glows plus a faint silver-white
+   sheen, over the charcoal canvas. Kept subtle — the page stays dark
+   but no longer pitch black. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(
+      58rem 34rem at 12% -8%,
+      rgba(42, 74, 122, 0.34) 0%,
+      rgba(24, 44, 80, 0.16) 42%,
+      transparent 72%
+    ),
+    radial-gradient(
+      48rem 30rem at 92% 108%,
+      rgba(34, 62, 108, 0.26) 0%,
+      rgba(18, 34, 64, 0.11) 45%,
+      transparent 74%
+    ),
+    linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.045) 0%,
+      rgba(255, 255, 255, 0.015) 34%,
+      transparent 62%
+    );
+}
+
+::selection {
+  background-color: #2a4a7a;
+  color: #f6f8fb;
+}
+
+/* Refined scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-base);
+}
+::-webkit-scrollbar-thumb {
+  background: #334156;
+  border: 3px solid var(--color-base);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #46586f;
+}
+
+/* =========================================================
+   UNLAYERED OVERRIDES
+   In the cascade, unlayered rules beat @layer rules, so these
+   re-map the handful of legacy *background* utilities that were
+   designed for the old light theme. Text / border utilities now
+   resolve to light tones automatically via the tokens above.
+   ========================================================= */
+
+.bg-paper { background-color: var(--color-base); }
+.bg-paper\/20 { background-color: rgba(246, 248, 251, 0.20); }
+.bg-paper\/60 { background-color: rgba(20, 27, 40, 0.68); }
+.bg-paper\/80 { background-color: rgba(24, 32, 47, 0.90); }
+.bg-paper\/85 { background-color: rgba(20, 27, 40, 0.86); }
+.bg-paper\/90 { background-color: rgba(21, 28, 42, 0.92); }
+.bg-paper\/95 { background-color: rgba(22, 30, 44, 0.95); }
+
+.bg-ink { background-color: var(--color-navy-deep); }
+/* Low-opacity `ink` reads as a soft white/silver tint on the charcoal canvas */
+.bg-ink\/5 { background-color: rgba(216, 226, 242, 0.07); }
+.bg-ink\/8 { background-color: rgba(216, 226, 242, 0.10); }
+.bg-ink\/10 { background-color: rgba(216, 226, 242, 0.12); }
+.bg-ink\/20 { background-color: rgba(14, 22, 38, 0.44); }
+.bg-ink\/30 { background-color: rgba(12, 19, 33, 0.54); }
+.bg-ink\/40 { background-color: rgba(10, 16, 28, 0.62); }
+.bg-ink\/50 { background-color: rgba(10, 15, 26, 0.68); }
+.bg-ink\/70 { background-color: rgba(11, 16, 27, 0.82); }
+.bg-ink\/90 { background-color: rgba(12, 17, 28, 0.92); }
+
+/* stone-950 doubles as the admin accent surface and the admin heading colour.
+   Headings must stay light; the surface override above keeps buttons navy. */
+.text-stone-950 { color: var(--color-paper); }
+
+/* bronze / wine are badge backgrounds (light text sits on them), so their
+   *text* roles need the lighter champagne / rose tones instead. */
+.text-bronze { color: #c9a86e; }
+.fill-bronze { fill: #c9a86e; }
+.hover\:text-bronze:hover { color: #e2c58f; }
+.text-wine { color: #e89099; }
+.bg-wine\/5 { background-color: rgba(232, 144, 153, 0.08); }
+.bg-wine\/10 { background-color: rgba(232, 144, 153, 0.10); }
+.hover\:bg-wine\/5:hover { background-color: rgba(232, 144, 153, 0.08); }
+.bg-bronze\/5 { background-color: rgba(201, 168, 110, 0.08); }
+.bg-bronze\/10 { background-color: rgba(201, 168, 110, 0.12); }
+
+/* Hero / editorial image overlays: softened dark scrims so the
+   photography shows through more than before. */
+.from-ink\/85 { --tw-gradient-from: rgba(10, 15, 26, 0.82); }
+.from-ink\/75 { --tw-gradient-from: rgba(12, 18, 30, 0.74); }
+.from-ink\/60 { --tw-gradient-from: rgba(14, 20, 33, 0.58); }
+.via-ink\/30 { --tw-gradient-via: rgba(16, 23, 37, 0.34); }
+.via-ink\/20 { --tw-gradient-via: rgba(16, 23, 37, 0.24); }
+.to-ink\/20 { --tw-gradient-to: rgba(12, 18, 30, 0.26); }
+
+@layer utilities {
+  .font-serif {
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .tracking-luxe {
+    letter-spacing: 0.3em;
+  }
+  .tracking-wide-2 {
+    letter-spacing: 0.18em;
+  }
+
+  /* Hairline animated underline */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Subtle navy grain texture */
+  .bg-grain {
+    background-image: radial-gradient(
+      rgba(190, 210, 245, 0.05) 1px,
+      transparent 1px
+    );
+    background-size: 4px 4px;
+  }
+
+  /* Luxury ease curve */
+  .ease-luxe {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-marquee {
+    animation: var(--animate-marquee);
+  }
+
+  /* Ken Burns slow zoom for hero images */
+  .animate-kenburns {
+    animation: kenburns 18s ease-out forwards;
+  }
+
+  .animate-float {
+    animation: floatUp 3s ease-in-out infinite;
+  }
+
+  /* Vertical line decorative element */
+  .line-grow {
+    transform-origin: top;
+    animation: lineGrow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Soft luxury text shadow for overlays */
+  .text-luxe-shadow {
+    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Gradient champagne text */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #f0d9a8 0%, #c9a86e 38%, #f3e6c6 66%, #a8865c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ---------- Midnight navy accents (used sparingly) ---------- */
+
+  /* Single navy radial bloom, sits behind content */
+  .bg-radial-navy {
+    background-image: radial-gradient(
+      70% 60% at 50% 0%,
+      rgba(42, 76, 132, 0.36) 0%,
+      rgba(22, 42, 80, 0.17) 45%,
+      transparent 78%
+    );
+  }
+
+  /* Tighter, off-centre bloom for panels / cards */
+  .bg-radial-navy-soft {
+    background-image: radial-gradient(
+      46rem 22rem at 78% -10%,
+      rgba(36, 68, 122, 0.28) 0%,
+      rgba(18, 36, 70, 0.11) 50%,
+      transparent 76%
+    );
+  }
+
+  /* Bottom-anchored bloom (footers, section closes) */
+  .bg-radial-navy-bottom {
+    background-image: radial-gradient(
+      60rem 24rem at 50% 118%,
+      rgba(34, 64, 118, 0.34) 0%,
+      rgba(18, 34, 66, 0.13) 48%,
+      transparent 78%
+    );
+  }
+
+  /* Linear charcoal → navy, for slim bars (announcement, sidebars) */
+  .bg-navy-sheen {
+    background-image: linear-gradient(
+      100deg,
+      #141b28 0%,
+      #18243a 38%,
+      #1e3256 62%,
+      #141b28 100%
+    );
+  }
+
+  /* Surface treatment for cards: charcoal base with a faint navy wash */
+  .bg-surface-navy {
+    background-color: var(--color-surface);
+    background-image: radial-gradient(
+      34rem 16rem at 82% 0%,
+      rgba(46, 78, 132, 0.22) 0%,
+      transparent 70%
+    );
+  }
+
+  /* Soft silver-white sheen — a restrained light mix, used on a few
+     panels only so the page does not go flat or washed out. */
+  .bg-sheen-light {
+    background-image: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.055) 0%,
+      rgba(255, 255, 255, 0.02) 38%,
+      transparent 66%
+    );
+  }
+
+  /* Lighter card ring, so panels read against the charcoal canvas */
+  .ring-panel {
+    --tw-ring-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .border-navy-hairline {
+    border-color: rgba(58, 98, 162, 0.30);
+  }
+
+  .shadow-navy {
+    box-shadow: 0 18px 50px -24px rgba(6, 12, 26, 0.9),
+      0 0 0 1px rgba(48, 84, 148, 0.18);
+  }
+
+  .shadow-navy-hover {
+    box-shadow: 0 22px 60px -22px rgba(6, 12, 26, 0.95),
+      0 0 0 1px rgba(66, 108, 178, 0.32),
+      0 0 28px -6px rgba(36, 68, 124, 0.36);
+  }
+
+  /* ---------- Featured premium accent (#F4BE38) ----------
+     Primary action buttons only — never used as a page tint,
+     border, heading or background wash. */
+
+  .bg-cta-accent {
+    background-image: linear-gradient(
+      135deg,
+      #fdd465 0%,
+      #f4be38 48%,
+      #e5ab21 100%
+    );
+  }
+
+  .hover\:bg-cta-accent-hover:hover {
+    background-image: linear-gradient(
+      135deg,
+      #ffe38d 0%,
+      #f9cb52 48%,
+      #efb733 100%
+    );
+  }
+
+  /* Soft gold halo so the CTA reads as the featured element */
+  .shadow-cta {
+    box-shadow: 0 14px 34px -14px rgba(244, 190, 56, 0.45),
+      0 0 0 1px rgba(244, 190, 56, 0.22);
+  }
+
+  .shadow-cta-hover {
+    box-shadow: 0 18px 44px -14px rgba(244, 190, 56, 0.60),
+      0 0 0 1px rgba(253, 212, 101, 0.45),
+      0 0 26px -6px rgba(244, 190, 56, 0.42);
+  }
+
+  /* Slim gold accent line — for subtle emphasis next to CTAs */
+  .bg-accent-line {
+    background-image: linear-gradient(90deg, transparent, #f4be38, transparent);
+  }
+}
