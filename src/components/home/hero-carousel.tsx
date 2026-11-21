@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const SLIDES = [
   { src: "/images/school-1.jpg", alt: "St. Thomas' College Matale — the college building" },
@@ -13,36 +13,32 @@ const SLIDES = [
 
 const SLIDE_MS = 6500;
 
-/**
- * Cinematic hero: the three college photographs cross-fade slowly into one
- * another with a subtle Ken Burns drift, so the imagery feels like a film
- * cut rather than a slideshow.
- */
+/* Shared easing — the same luxury curve used across the site. */
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const rise = (delay: number) => ({
+  initial: { opacity: 0, y: 22 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 1.15, delay, ease: EASE },
+});
+
 export function HeroCarousel() {
   const [index, setIndex] = useState(0);
 
-  const next = useCallback(
-    () => setIndex((i) => (i + 1) % SLIDES.length),
-    [],
-  );
+  const next = useCallback(() => setIndex((i) => (i + 1) % SLIDES.length), []);
 
   useEffect(() => {
     const t = window.setInterval(next, SLIDE_MS);
     return () => window.clearInterval(t);
   }, [next]);
 
-  // Reset the timer whenever the user picks a slide manually.
-  useEffect(() => {
-    return () => undefined;
-  }, [index]);
-
   return (
-    <section className="relative h-[92vh] min-h-[640px] w-full overflow-hidden">
-      {/* Cross-fading image stack */}
+    <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden">
+      {/* ---- Cross-fading image stack ---- */}
       {SLIDES.map((slide, i) => (
         <div
           key={slide.src}
-          className="absolute inset-0 transition-opacity duration-[2200ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+          className="absolute inset-0 transition-opacity duration-[2400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
           style={{ opacity: i === index ? 1 : 0 }}
           aria-hidden={i !== index}
         >
@@ -57,79 +53,90 @@ export function HeroCarousel() {
         </div>
       ))}
 
-      {/* Navy bloom keeps the mood; top and bottom fade into the page canvas
-          (charcoal) instead of a white haze. */}
+      {/* ---- Scrims: navy bloom + centre vignette + canvas blends ---- */}
       <div className="absolute inset-0 bg-radial-navy" />
-      <div className="absolute inset-x-0 top-0 h-[38%] bg-gradient-to-b from-base via-base/55 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-base via-base/70 to-transparent" />
+      <div className="absolute inset-0 bg-hero-vignette" />
+      <div className="absolute inset-x-0 top-0 h-[36%] bg-gradient-to-b from-base via-base/50 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-[44%] bg-gradient-to-t from-base via-base/70 to-transparent" />
 
-      {/* Centered content */}
+      {/* ---- Content ---- */}
       <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-6 text-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center"
-          >
-            <div className="flex items-center gap-3">
-              <span className="h-px w-10 bg-accent/70" />
-              <p className="text-[11px] font-semibold uppercase tracking-luxe text-paper">
-                Est. 1873
-              </p>
-              <span className="h-px w-10 bg-accent/70" />
-            </div>
+        {/* Eyebrow: EST. 1873 */}
+        <motion.div {...rise(0)} className="flex items-center gap-4">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-accent/80 sm:w-14" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.5em] text-accent sm:text-[11px]">
+            Est. 1873
+          </span>
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-accent/80 sm:w-14" />
+        </motion.div>
 
-            <p className="mt-7 text-base font-semibold uppercase tracking-[0.42em] text-paper sm:text-lg">
-              Welcome To
-            </p>
-
-            <h1 className="mt-4 max-w-4xl font-serif text-[clamp(2.6rem,7vw,5.6rem)] font-bold leading-[0.98] text-paper text-luxe-shadow text-balance">
-              St. Thomas&rsquo; College
-              <br />
-              <span className="text-gradient-gold">Matale</span>
-            </h1>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Featured CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-11 flex flex-col items-center gap-5"
+        {/* Row 1 — Welcome To */}
+        <motion.p
+          {...rise(0.12)}
+          className="mt-9 text-[11px] font-medium uppercase tracking-[0.46em] text-paper/85 sm:text-[13px] sm:tracking-[0.52em]"
         >
-          {/* Third row of the sentence: Welcome to St.Thomas' College Matale — Shop */}
-          <p className="text-2xl font-bold uppercase tracking-[0.34em] text-paper sm:text-3xl">
-            Shop
-          </p>
+          Welcome To
+        </motion.p>
 
+        {/* Row 2 — the college name */}
+        <motion.h1
+          {...rise(0.24)}
+          className="mt-6 max-w-5xl font-serif text-[clamp(2.5rem,6.6vw,5.4rem)] font-bold leading-[1.02] tracking-[-0.015em] text-paper text-luxe-shadow"
+        >
+          St. Thomas&rsquo; College
+          <span className="mt-1 block">
+            <span className="text-gradient-gold">Matale</span>
+          </span>
+        </motion.h1>
+
+        {/* Hairline separating the name from the action */}
+        <motion.div
+          {...rise(0.36)}
+          className="mt-9 h-px w-24 bg-gradient-to-r from-transparent via-paper/35 to-transparent"
+        />
+
+        {/* Row 3 — Shop (completes the sentence, flanked by hairlines) */}
+        <motion.p
+          {...rise(0.44)}
+          className="mt-7 flex items-center gap-4 text-[15px] font-semibold uppercase tracking-[0.4em] text-paper/90 sm:text-lg"
+        >
+          <span className="h-px w-6 bg-gradient-to-r from-transparent to-paper/45 sm:w-9" />
+          Shop
+          <span className="h-px w-6 bg-gradient-to-l from-transparent to-paper/45 sm:w-9" />
+        </motion.p>
+
+        {/* Featured CTA — the single gold action */}
+        <motion.div {...rise(0.58)} className="mt-9">
           <Link
             href="/shop"
-            className="group flex items-center gap-3 rounded-full bg-cta-accent px-10 py-4 text-xs font-semibold uppercase tracking-wide-2 text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover"
+            className="group inline-flex items-center gap-3.5 rounded-full bg-cta-accent px-9 py-4 text-[11px] font-bold uppercase tracking-[0.22em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover sm:px-11 sm:py-[18px] sm:text-xs"
           >
-            Shop
-            <span className="transition-transform duration-500 group-hover:translate-x-1">→</span>
+            Explore the store
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-ink/15 transition-transform duration-500 group-hover:translate-x-1">
+              →
+            </span>
           </Link>
-
-          {/* Slide indicator */}
-          <div className="flex items-center gap-2.5">
-            {SLIDES.map((s, i) => (
-              <button
-                key={s.src}
-                onClick={() => setIndex(i)}
-                aria-label={`Show slide ${i + 1}`}
-                className={`h-[3px] rounded-full transition-all duration-700 ${
-                  i === index
-                    ? "w-9 bg-accent"
-                    : "w-4 bg-paper/30 hover:bg-paper/60"
-                }`}
-              />
-            ))}
-          </div>
         </motion.div>
+      </div>
+
+      {/* ---- Slide indicators + counter (bottom of the hero, not mid-stack) ---- */}
+      <div className="absolute inset-x-0 bottom-12 z-20 flex flex-col items-center gap-4 px-6 sm:bottom-14">
+        <motion.div {...rise(0.8)} className="flex items-center gap-3">
+          {SLIDES.map((s, i) => (
+            <button
+              key={s.src}
+              onClick={() => setIndex(i)}
+              aria-label={`Show slide ${i + 1}`}
+              className={`h-[2px] rounded-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                i === index ? "w-10 bg-accent" : "w-5 bg-paper/25 hover:bg-paper/55"
+              }`}
+            />
+          ))}
+        </motion.div>
+
+        <motion.p {...rise(0.9)} className="font-mono text-[10px] tracking-[0.3em] text-paper/45">
+          {String(index + 1).padStart(2, "0")} / {String(SLIDES.length).padStart(2, "0")}
+        </motion.p>
       </div>
     </section>
   );
