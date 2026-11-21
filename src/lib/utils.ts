@@ -5,11 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatPrice(cents: number, currency = "USD", locale = "en-US") {
+/**
+ * Prices are stored as whole LKR rupees (e.g. 3200 = Rs. 3,200).
+ * Formatted without decimals, since Sri Lankan retail prices never use them.
+ */
+export function formatPrice(amount: number, currency = "LKR", locale = "en-LK") {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-  }).format(cents / 100);
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 export function averageRating(reviews: { rating: number }[]) {
