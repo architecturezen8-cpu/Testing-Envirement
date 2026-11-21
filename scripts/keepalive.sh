@@ -33,14 +33,23 @@ log() { echo "[$(date '+%H:%M:%S')] $*" >>"$LOG"; }
 # ---------- app ----------
 app_up() { curl -s -o /dev/null --max-time 8 -w '%{http_code}' "$HEALTH_URL" 2>/dev/null | grep -q 200; }
 
+# True when something already owns the port (e.g. the platform runtime).
+port_taken() { curl -s -o /dev/null --max-time 5 "http://localhost:$PORT" 2>/dev/null; }
+
 start_app() {
-  # Reuse a build if one exists, otherwise build first.
+  # Never fight another process for the port — a platform-managed runtime may
+  # simply be mid-restart, in which case waiting is the right move.
+  if port_taken; then
+    log "port $PORT already has a listener — waiting for it to become healthy"
+    return 0
+  fi
   if [ ! -d .next ]; then
     log "no .next build — building"
     npm run build >>"$LOG" 2>&1
   fi
   log "starting Next.js on :$PORT"
-  ( setsid nohup npm run start -- -p "$PORT" >>"$STATE_DIR/app.log" 2>&1 < /dev/null & )
+  setsid nohup npm run start -- -p "$PORT" >>"$STATE_DIR/app.log" 2>&1 < /dev/null &
+  disown || true
 }
 
 # ---------- tunnel ----------
@@ -83,7 +92,7 @@ cycle() {
     log "APP DOWN (health check failed)"
     start_app
     # give it time to boot
-    for _ in $(seq 1 20); do sleep 3; app_up && break; done
+    for _ in $(seq 1 25); do sleep 3; app_up && break; port_taken && continue; done
     app_up && log "APP RECOVERED" || log "APP still failing"
   fi
 
