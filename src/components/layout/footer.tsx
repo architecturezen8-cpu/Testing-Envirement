@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { SchoolCrest } from "@/components/layout/school-crest";
-import {
-  InstagramGlyph,
-  XGlyph,
-  ThreadsGlyph,
-  FacebookGlyph,
-  YoutubeGlyph,
-} from "@/components/layout/social-glyphs";
+import { InstagramGlyph, XGlyph, FacebookGlyph, YoutubeGlyph } from "@/components/layout/social-glyphs";
 
 export function Footer() {
   return (
@@ -37,7 +31,6 @@ export function Footer() {
             {[
               { href: "https://instagram.com", label: "Instagram", Glyph: InstagramGlyph },
               { href: "https://x.com", label: "X", Glyph: XGlyph },
-              { href: "https://threads.net", label: "Threads", Glyph: ThreadsGlyph },
               { href: "https://facebook.com", label: "Facebook", Glyph: FacebookGlyph },
               { href: "https://youtube.com", label: "YouTube", Glyph: YoutubeGlyph },
             ].map(({ href, label, Glyph }) => (

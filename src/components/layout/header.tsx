@@ -25,8 +25,8 @@ const navLinks: NavItem[] = [
     label: "Shop",
     href: "/shop",
     children: [
-      { label: "Merchandises", href: "/shop?category=Clothing" },
-      { label: "Event Tickets", href: "/shop?category=Shoes" },
+      { label: "Merchandises", href: "/shop" },
+      { label: "Event Tickets", href: "/tickets" },
     ],
   },
   { label: "Contact", href: "/contact" },
