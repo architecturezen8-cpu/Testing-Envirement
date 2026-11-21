@@ -78,33 +78,48 @@ Sign in at **/admin/login**.
 
 The sandbox preview URL is not publicly reachable, so a Cloudflare quick
 tunnel exposes the app. **Error 1033** means Cloudflare can no longer resolve
-the tunnel — it happens when the `cloudflared` process (or the Next.js server)
-dies, for example after an environment restart.
+the tunnel — it happens when `cloudflared` (or the server) dies.
 
-`scripts/keepalive.sh` is a supervisor that prevents it:
+### How it stays up
+
+`src/instrumentation.ts` + `src/tunnel-supervisor.ts` supervise the tunnel
+**from inside the Next.js server process**. External background jobs get
+reaped by the sandbox, but the platform keeps the app server alive, so the
+tunnel now lives as long as the app does.
+
+Every 15 seconds the supervisor:
+
+1. Checks `/api/health` on the app. If the app is down it leaves the tunnel
+   alone (the platform restarts the app, and recycling then would needlessly
+   rotate the hostname).
+2. If no tunnel is running, spawns one (`--protocol http2`).
+3. If a tunnel is running, verifies **Cloudflare's edge can actually serve
+   through it**. A process that is up but disconnected — the 1033 case — is
+   recycled.
+4. Kills any stale `cloudflared` left over from a previous server instance, so
+   processes never accumulate.
+
+The current hostname is written to `/tmp/tunnel/PUBLIC_URL`. Set
+`NOVA_TUNNEL_DISABLE=1` to opt out.
+
+Verified behaviour: killing `cloudflared` produced
+`recycling tunnel → tunnel up: <new-hostname>` within one check cycle, with
+exactly one process afterwards.
+
+### Manual control
 
 ```bash
-bash scripts/keepalive.sh start    # launch the supervisor (detached)
 bash scripts/keepalive.sh status   # app + tunnel health + current URL
-bash scripts/keepalive.sh stop     # stop the supervisor and tunnel
+bash scripts/keepalive.sh stop     # stop the external supervisor + tunnel
+bash scripts/boot-tunnel.sh        # start the external supervisor (detached)
+bash scripts/tunnel.sh start       # one-off tunnel without supervision
 ```
 
-Every 20 seconds it checks:
+The scripts are a fallback; the in-process supervisor is the primary mechanism.
 
-- **App** — `GET /api/health`; if it fails it (re)builds when needed and starts
-  `next start` on port 3000.
-- **Tunnel** — verifies the `cloudflared` process is alive **and** that
-  Cloudflare's edge can actually serve through it. A process that is running
-  but disconnected (the 1033 case) is killed and restarted.
-- The current hostname is written to `/tmp/tunnel/PUBLIC_URL`.
-
-`scripts/tunnel.sh` remains available for manual control (`start`, `status`,
-`stop`) without supervision.
-
-> Quick tunnels are ephemeral: **a restart issues a new hostname.** The
-> supervisor restores connectivity automatically, but the URL changes. For a
-> permanent hostname, register a Cloudflare named tunnel against your own
-> domain instead of `--url`.
+> Quick tunnels are ephemeral: **a new hostname is issued each time the tunnel
+> is recycled.** For a permanent hostname, register a Cloudflare named tunnel
+> against your own domain instead of `--url`.
 
 ## Pushing changes
 

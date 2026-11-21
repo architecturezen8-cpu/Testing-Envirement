@@ -106,13 +106,13 @@ export function HeroCarousel() {
         </motion.p>
 
         {/* Featured CTA — the single gold action */}
-        <motion.div {...rise(0.58)} className="mt-8 w-full px-2 sm:mt-9 sm:w-auto sm:px-0">
+        <motion.div {...rise(0.58)} className="mt-7 sm:mt-9">
           <Link
             href="/shop"
-            className="group flex w-full items-center justify-center gap-3 rounded-full bg-cta-accent px-8 py-5 text-[15px] font-extrabold uppercase tracking-[0.16em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover sm:inline-flex sm:w-auto sm:gap-3.5 sm:px-11 sm:py-[17px] sm:text-[12.5px] sm:font-bold sm:tracking-[0.22em]"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-cta-accent px-6 py-3 text-[10.5px] font-bold uppercase tracking-[0.16em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover sm:gap-3 sm:px-8 sm:py-3.5 sm:text-[11px] sm:tracking-[0.2em]"
           >
             Explore the store
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-ink/15 text-[15px] transition-transform duration-500 group-hover:translate-x-1 sm:h-5 sm:w-5 sm:text-xs">
+            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent-ink/15 text-[10px] transition-transform duration-500 group-hover:translate-x-1 sm:h-[18px] sm:w-[18px] sm:text-[11px]">
               →
             </span>
           </Link>
