@@ -38,6 +38,8 @@ function ProductPageInner() {
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
+  // Event tickets: how many people a Family Pass covers (not every family is the same size)
+  const [familySize, setFamilySize] = useState(4);
 
   useEffect(() => {
     setLoading(true);
@@ -114,6 +116,21 @@ function ProductPageInner() {
     return new Set(variants.filter((v) => v.stock > 0).map((v) => v.color));
   }, [variants, product]);
 
+  // ---- Event tickets ----
+  // Tickets have no colour dimension; the "size" list is really a set of
+  // quantity tiers, and the total re-computes from the base price.
+  const isTicket = product?.category === "Event Tickets";
+
+  const ticketQty = useMemo(() => {
+    if (!selectedSize) return 1;
+    if (selectedSize.toLowerCase().startsWith("family")) return familySize;
+    const n = Number.parseInt(selectedSize.replace(/[^0-9]/g, ""), 10);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }, [selectedSize, familySize]);
+
+  const unitPrice = product?.price ?? 0;
+  const ticketTotal = unitPrice * ticketQty;
+
   // Refetch reviews after a new one is submitted
   const refreshReviews = () => {
     fetch(`/api/products/${slug}`)
@@ -126,17 +143,25 @@ function ProductPageInner() {
     if (!product) return;
     if (!variantAvailable) return;
     if (!selectedSize) return;
-    if (!selectedColor) return;
+    // Tickets have no colour, so only the tier is required.
+    if (!isTicket && !selectedColor) return;
+
+    const label = isTicket
+      ? selectedSize.toLowerCase().startsWith("family")
+        ? `Family Pass (${familySize} people)`
+        : selectedSize
+      : selectedSize;
+
     setAdding(true);
     addItem({
       productId: product.id,
       slug: product.slug,
-      name: product.name,
-      price: product.price,
+      name: isTicket ? `${product.name} — ${label}` : product.name,
+      price: isTicket ? ticketTotal : product.price,
       image: product.images[0] ?? "/images/hero.jpg",
-      size: selectedSize,
-      color: selectedColor,
-      quantity,
+      size: isTicket ? label : selectedSize,
+      color: isTicket ? "—" : selectedColor,
+      quantity: 1,
     });
     setTimeout(() => setAdding(false), 800);
   };
@@ -244,21 +269,39 @@ function ProductPageInner() {
               </div>
               <div className="mt-5 flex items-baseline gap-3">
                 <span className="font-serif text-3xl text-ink">
-                  {formatPrice(product.price)}
+                  {formatPrice(isTicket ? ticketTotal : product.price)}
                 </span>
-                {product.compareAtPrice && product.compareAtPrice > product.price && (
+                {product.compareAtPrice && product.compareAtPrice > product.price && !isTicket && (
                   <span className="text-lg text-stone-400 line-through">
                     {formatPrice(product.compareAtPrice)}
                   </span>
                 )}
               </div>
 
+              {/* Ticket total — re-computes as the tier / family size changes */}
+              {isTicket && (
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                  <span className="text-stone-500">
+                    {formatPrice(unitPrice)} × {ticketQty}
+                  </span>
+                  <span className="text-stone-300">=</span>
+                  <span className="font-semibold text-ink">
+                    {formatPrice(ticketTotal)}
+                  </span>
+                  {ticketQty > 1 && (
+                    <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[11px] font-medium text-accent-ink">
+                      {ticketQty} tickets
+                    </span>
+                  )}
+                </div>
+              )}
+
               <p className="mt-6 max-w-prose leading-relaxed text-stone-600">
                 {product.description}
               </p>
 
-              {/* Colors */}
-              {colors.length > 0 && (
+              {/* Colors — tickets have no colour dimension */}
+              {!isTicket && colors.length > 0 && (
                 <div className="mt-8">
                   <div className="flex items-center justify-between">
                     <p className="text-[11px] uppercase tracking-wide-2 text-ink">
@@ -299,9 +342,20 @@ function ProductPageInner() {
                 </div>
               )}
 
-              {/* Sizes */}
+              {/* Sizes — or quantity tiers for event tickets */}
               <div className="mt-7">
-                <p className="text-[11px] uppercase tracking-wide-2 text-ink">Size</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase tracking-wide-2 text-ink">
+                    {isTicket ? "Tickets" : "Size"}
+                  </p>
+                  {isTicket && (
+                    <span className="text-sm text-stone-500">
+                      {selectedSize.toLowerCase().startsWith("family")
+                        ? `${familySize} people`
+                        : selectedSize}
+                    </span>
+                  )}
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {product.sizes.map((size) => {
                     const hasAnyStock = variants.length === 0
@@ -325,6 +379,34 @@ function ProductPageInner() {
                   })}
                 </div>
               </div>
+
+              {/* Family Pass — how many people it should cover */}
+              {isTicket && selectedSize.toLowerCase().startsWith("family") && (
+                <div className="mt-6 rounded-xl border border-accent/30 bg-accent/5 p-5">
+                  <p className="text-[11px] uppercase tracking-wide-2 text-ink">
+                    How many people?
+                  </p>
+                  <p className="mt-1 text-xs text-stone-500">
+                    Families come in all sizes — pick the number of tickets the
+                    pass should cover.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[3, 4, 5, 6, 7, 8].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setFamilySize(n)}
+                        className={`h-11 w-11 rounded-full border text-sm font-medium transition-all ${
+                          familySize === n
+                            ? "border-ink bg-ink text-paper"
+                            : "border-ink/15 text-ink/80 hover:border-ink/40"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Stock status — variant aware */}
               <div className="mt-7 flex items-center gap-2">
@@ -564,7 +646,10 @@ function ProductPageInner() {
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <p className="font-serif text-sm text-ink line-clamp-1">{product.name}</p>
-              <p className="text-xs text-stone-500">{formatPrice(product.price)} · {selectedColor} / {selectedSize}</p>
+              <p className="text-xs text-stone-500">
+                {formatPrice(isTicket ? ticketTotal : product.price)}
+                {isTicket ? ` · ${selectedSize}` : ` · ${selectedColor} / ${selectedSize}`}
+              </p>
             </div>
             <button
               onClick={handleAddToCart}

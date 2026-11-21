@@ -15,39 +15,87 @@ import { collections, categories, products, reviews, productVariants } from "./s
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-/** Deterministic Unsplash photo URL for a given search term + index. */
-function img(term: string, i = 0) {
-  const base = `https://images.unsplash.com/photo-`;
-  // Stable pseudo-random photo ids per term so re-seeding looks the same.
-  const seed = [...term].reduce((a, c) => a + c.charCodeAt(0), 0) + i * 7;
-  const ids = [
-    "1620963925608-9c9a31d8f6b4",
-    "1584917865442-de89df76afd3",
-    "1594633312681-425ac7d10336",
-    "1521572163474-6864f9cf17ab",
-    "1596462502278-27bfdc403348",
-    "1564969500195-a3d6b1a2d34c",
-    "1544816155-12df9643f363",
-    "1576871337622-98d48d1cf531",
-    "1571945153237-4929e783af4a",
-    "1618354691373-d851c5c3a990",
-    "1602810318383-e386cc2a3ccf",
-    "1547949003-9792a18a2601",
-    "1624222247344-550fb60583e0",
-    "1519741497674-611481863552",
-    "1611085583191-a3b181a88401",
-    "1621072156002-e2fccdc0b176",
-    "1585487000169-c7cc7193efda",
-    "1595341888016-a392ef81b7de",
-    "1556905055-8f358a7a47b2",
-    "1583743814966-8936f5b7be1a",
-  ];
-  const id = ids[seed % ids.length];
-  return `${base}${id}?auto=format&fit=crop&w=800&h=1200&q=80`;
+/**
+ * Curated photography.
+ *
+ * Four studio shots were generated for the core uniform items; everything else
+ * uses stock photography chosen to match the product. Keeping the map explicit
+ * (rather than hashing a term into a random photo) means every product shows
+ * something that actually looks like the thing being sold.
+ */
+const PEXELS = (id: string, w = 800, h = 1200) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=${w}&h=${h}`;
+
+const PHOTO = {
+  polo: "/images/merch/polo.jpg",
+  whiteShirt: "/images/merch/white-shirt.jpg",
+  blazer: "/images/merch/blazer.jpg",
+  knitwear: "/images/merch/knitwear.jpg",
+  hoodieRack: PEXELS("30095407"),
+  badge: PEXELS("31350073"),        // enamelled metal badge close-up
+  bag: `https://images.pexels.com/photos/11463459/pexels-photo-11463459.png?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1200`, // navy backpack (.png only)
+  cap: PEXELS("29926576"),          // navy cap
+  tieStriped: PEXELS("4637863"),    // striped navy tie
+  tiesRolled: PEXELS("34342976"),   // rolled ties
+  stationery: PEXELS("5594315"),    // notebook stack + pencil
+  stationerySet: PEXELS("7718866"), // notebooks, pens, ruler
+  cricketNight: PEXELS("36230651", 1200, 800), // floodlit cricket, big crowd
+  cricketField: PEXELS("21415109", 1200, 800), // players walking out
+  cricketAction: PEXELS("31131696", 1200, 800),
+  collegeBuilding: "/images/school-1.jpg",
+  students: "/images/school-2.jpg",
+  merchStillLife: "/images/school-3.jpg",
+} as const;
+
+/** Per-slug gallery — first entry is the primary image. */
+const IMAGE_MAP: Record<string, string[]> = {
+  "college-polo-shirt": [PHOTO.polo, PHOTO.merchStillLife],
+  "college-sports-t-shirt": [PHOTO.polo, PHOTO.knitwear],
+  "school-white-shirt": [PHOTO.whiteShirt, PHOTO.merchStillLife],
+  "school-blazer": [PHOTO.blazer, PHOTO.merchStillLife],
+  "college-pullover": [PHOTO.knitwear],
+  "college-hoodie": [PHOTO.hoodieRack, PHOTO.knitwear],
+
+  "austin-house-badge": [PHOTO.badge],
+  "bede-house-badge": [PHOTO.badge],
+  "pius-house-badge": [PHOTO.badge],
+  "clement-house-badge": [PHOTO.badge],
+  "college-crest-badge": [PHOTO.badge, PHOTO.blazer],
+
+  "college-school-bag": [PHOTO.bag],
+  "college-cap": [PHOTO.cap, PHOTO.merchStillLife],
+
+  "college-tie": [PHOTO.tieStriped],
+  "prefect-tie": [PHOTO.tiesRolled],
+
+  "school-face-mask": [PHOTO.stationerySet],
+  "exam-writing-paper-pack": [PHOTO.stationery],
+
+  "big-match-2026": [PHOTO.cricketNight, PHOTO.cricketAction],
+  "big-match-2026-pavilion": [PHOTO.cricketField, PHOTO.cricketNight],
+  "annual-prize-day-2026": [PHOTO.collegeBuilding],
+  "inter-house-sports-meet-2026": [PHOTO.cricketAction, PHOTO.cricketField],
+  "carols-evening-2026": [PHOTO.students, PHOTO.collegeBuilding],
+};
+
+/** Collections take their cover photo from a representative product. */
+const COLLECTION_COVER: Record<string, string> = {
+  uniforms: PHOTO.polo,
+  "house-badges": PHOTO.badge,
+  accessories: PHOTO.bag,
+  stationery: PHOTO.stationery,
+  "event-tickets": PHOTO.cricketNight,
+};
+
+function collectionCover(slug: string): string | null {
+  return COLLECTION_COVER[slug] ?? null;
 }
 
-function gallery(term: string) {
-  return [img(term, 0), img(term, 1), img(term, 2)];
+function gallery(slug: string): string[] {
+  const g = IMAGE_MAP[slug];
+  if (g?.length) return g;
+  // Sensible fallback for anything not in the map yet.
+  return [PHOTO.merchStillLife];
 }
 
 const NAVY = { name: "Navy", value: "#1e2a4a" };
@@ -391,7 +439,7 @@ const TICKETS: Ticket[] = [
   },
 ];
 
-const TICKET_SIZES = ["1 Ticket", "2 Tickets", "4 Tickets", "Family Pass"];
+const TICKET_SIZES = ["1 Ticket", "2 Tickets", "3 Tickets", "4 Tickets", "Family Pass"];
 
 /* ------------------------------------------------------------------ */
 /*  Seed                                                               */
@@ -411,7 +459,7 @@ async function seed() {
     .values(
       COLLECTIONS.map((c) => ({
         ...c,
-        image: img(c.slug),
+        image: collectionCover(c.slug),
       })),
     )
     .returning();
@@ -453,7 +501,9 @@ async function seed() {
     category: "Event Tickets",
     gender: "Unisex",
     sizes: TICKET_SIZES,
-    colors: [NAVY],
+    // Tickets carry no colour — the storefront hides the picker and the
+    // variant rows are created per tier only.
+    colors: [],
     images: gallery(t.slug),
     collectionId: bySlug.get("event-tickets") ?? null,
     rating: "4.9",
@@ -493,11 +543,26 @@ async function seed() {
   for (const p of all) {
     const sizes = p.sizes ?? [];
     const colors = (p.colors ?? []) as { name: string; value: string }[];
-    for (const s of sizes) {
+
+    // Products without colours (event tickets) get one variant per tier.
+    if (colors.length === 0) {
+      for (const sz of sizes) {
+        await db.insert(productVariants).values({
+          productId: p.id,
+          size: sz,
+          color: "—",
+          stock: p.category === "Event Tickets" ? 200 : 25,
+        });
+        variantCount += 1;
+      }
+      continue;
+    }
+
+    for (const sz of sizes) {
       for (const c of colors) {
         await db.insert(productVariants).values({
           productId: p.id,
-          size: s,
+          size: sz,
           color: c.name,
           stock: 25,
         });
