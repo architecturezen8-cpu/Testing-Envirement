@@ -92,6 +92,57 @@ Sign into the admin panel at `/admin/login` with `ADMIN_USERNAME` /
 | `STRIPE_SECRET_KEY` | Optional — enables the Stripe checkout route |
 | `GITHUB_REPO` / `GITHUB_TOKEN` | Used by `scripts/push.sh` |
 
+## Sending ticket emails (SMTP)
+
+Every event-ticket purchase emails the buyer a copy of their pass with the QR
+code inline. Delivery is **off by default** — orders still succeed and tickets
+are still issued, but no email is sent until you add credentials.
+
+### Gmail (easiest)
+
+1. Turn on **2-Step Verification** at <https://myaccount.google.com/security>.
+2. Open <https://myaccount.google.com/apppasswords>.
+3. Enter an app name (e.g. `Nova Store`) and click **Create**.
+4. Google shows a 16-character password like `abcd efgh ijkl mnop`.
+5. Fill in `.env`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=your-address@gmail.com
+SMTP_PASS=abcdefghijklmnop
+```
+
+> The password must be the **App Password**, not the account password, and
+> without the spaces. Restart the server after editing `.env`.
+
+### Test it
+
+```bash
+npx tsx scripts/test-email.mjs your-email@gmail.com
+```
+
+Prints whether the connection, auth and delivery all work, and explains the
+most common failures (wrong App Password, blocked port).
+
+### Other providers
+
+Any SMTP server works — set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+`SMTP_PASS`, `SMTP_FROM`. Transactional services such as
+[Resend](https://resend.com) (SMTP `smtp.resend.com:465`) or
+[SendGrid](https://sendgrid.com) (`smtp.sendgrid.net:587`) are more reliable in
+production than a personal Gmail account, which has a ~500 messages/day limit.
+
+### Where the values live
+
+| Variable | Purpose |
+| --- | --- |
+| `SMTP_HOST` | SMTP server hostname |
+| `SMTP_PORT` | `465` for implicit TLS, `587` for STARTTLS |
+| `SMTP_USER` | Username (your Gmail address) |
+| `SMTP_PASS` | App password |
+| `SMTP_FROM` | From-header shown to the buyer |
+
 ## Design system
 
 - **Midnight theme** — charcoal canvas (`#0f141f`), dark navy accents used
