@@ -55,8 +55,75 @@ export default async function HomePage() {
       {/* ===== HERO — cinematic college imagery ===== */}
       <HeroCarousel />
 
+      {/* ===== FEATURED COLLECTIONS — Everything a Thomian needs ===== */}
+      <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-10 lg:py-32">
+        <AnimatedSection>
+          <div className="mb-14 text-center">
+            <p className="text-[11px] uppercase tracking-luxe text-accent">
+              College store
+            </p>
+            <h2 className="mt-4 font-serif text-[clamp(2rem,4vw,3.5rem)] font-light leading-tight text-ink text-balance">
+              Everything a Thomian needs
+            </h2>
+            <div className="mx-auto mt-6 h-px w-16 bg-accent/50" />
+          </div>
+        </AnimatedSection>
+
+        <StaggerContainer className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredCollections.map((collection, idx) => (
+            <StaggerItem key={collection.id}>
+              <Link
+                href={`/shop?collection=${collection.slug}`}
+                className={`group relative flex h-full min-h-[320px] flex-col justify-end overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel ${
+                  idx === 0 ? "lg:row-span-2 lg:min-h-[460px]" : ""
+                }`}
+              >
+                {collection.image ? (
+                  <Image
+                    src={collection.image}
+                    alt={collection.name}
+                    fill
+                    className="object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                    sizes="(max-width: 1024px) 50vw, 33vw"
+                  />
+                ) : null}
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
+                <div className="relative z-10 p-7 text-paper">
+                  <p className="text-[10px] uppercase tracking-luxe text-paper/60">
+                    College store
+                  </p>
+                  <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">
+                    {collection.name}
+                  </h3>
+                  {collection.description && (
+                    <p className="mt-2 max-w-xs text-sm leading-relaxed text-paper/65">
+                      {collection.description}
+                    </p>
+                  )}
+                  <span className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-wide-2 text-paper/90 transition-all duration-500 group-hover:gap-4">
+                    Shop now
+                    <span>→</span>
+                  </span>
+                </div>
+              </Link>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      </section>
+
       {/* ===== SHOP BY CATEGORY ===== */}
-      <section className="mx-auto max-w-[1400px] px-6 pb-4 pt-4 lg:px-10">
+      <section className="mx-auto max-w-[1400px] px-6 pb-16 lg:px-10">
+        <AnimatedSection>
+          <div className="mb-10 text-center">
+            <p className="text-[11px] uppercase tracking-luxe text-accent">
+              Quick picks
+            </p>
+            <h2 className="mt-4 font-serif text-[clamp(1.8rem,3.4vw,2.75rem)] font-light leading-tight text-ink">
+              Shop by category
+            </h2>
+          </div>
+        </AnimatedSection>
+
         <StaggerContainer className="grid gap-5 sm:grid-cols-3">
           {[
             {
