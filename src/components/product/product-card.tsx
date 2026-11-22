@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn, formatPrice } from "@/lib/utils";
 import { StarRating } from "@/components/ui/star-rating";
 import { FavoriteButton } from "@/components/product/favorite-button";
+import { TicketCard } from "@/components/product/ticket-card";
 import type { Product } from "@/db/schema";
 
 interface ProductCardProps {
@@ -25,6 +26,44 @@ export function ProductCard({ product, className, onQuickView }: ProductCardProp
   return (
     <article className={cn("group flex h-full flex-col", !inStock && "opacity-90", className)}>
       <Link href={`/products/${product.slug}`} className="flex h-full flex-col">
+        {product.category === "Event Tickets" ? (
+        <div className="relative overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel transition-shadow duration-700 group-hover:shadow-navy-hover">
+          {/* Badges */}
+          <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+            {product.badge && (
+              <span className="rounded-full bg-cta-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide-2 text-accent-ink shadow-cta">
+                {product.badge}
+              </span>
+            )}
+            {onSale && (
+              <span className="rounded-full bg-wine px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide-2 text-paper">
+                Sale
+              </span>
+            )}
+            {product.offerActive && product.offerLabel && (
+              <span className="rounded-full bg-bronze px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide-2 text-paper">
+                {product.offerLabel}
+              </span>
+            )}
+            {!inStock && (
+              <span className="rounded-full bg-stone-900/80 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide-2 text-white">
+                Sold out
+              </span>
+            )}
+          </div>
+
+          {/* Drawn event ticket */}
+          <div className="px-4 pb-3 pt-11">
+            <TicketCard
+              eventTitle={product.name}
+              date={product.description.split("Event: ")[1]?.split("\n")[0] ?? "Date to be announced"}
+              venue={product.description.split("Venue: ")[1]?.split("\n")[0] ?? "College grounds"}
+              tier={product.sizes?.[0] ?? "General"}
+              price={formatPrice(product.price)}
+            />
+          </div>
+        </div>
+        ) : (
         <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel transition-shadow duration-700 group-hover:shadow-navy-hover">
           {/* Badges */}
           <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
@@ -115,6 +154,7 @@ export function ProductCard({ product, className, onQuickView }: ProductCardProp
             </div>
           )}
         </div>
+        )}
 
         <div className="mt-3.5 flex items-start justify-between gap-3">
           <div className="min-w-0">

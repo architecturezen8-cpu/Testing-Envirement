@@ -12,6 +12,7 @@ import {
 import http from "node:http";
 import https from "node:https";
 import path from "node:path";
+import os from "node:os";
 import { openSync } from "node:fs";
 
 /**
@@ -27,13 +28,30 @@ import { openSync } from "node:fs";
  * replaced, which keeps the public URL stable across app restarts.
  */
 
-const STATE_DIR = "/tmp/tunnel";
-const BIN = path.join(STATE_DIR, "cloudflared");
+/**
+ * State directory.
+ *
+ * - Linux / CI: `/tmp/tunnel` (matches the shell scripts in scripts/)
+ * - Windows: `%LOCALAPPDATA%\nova\tunnel` — `/tmp` does not exist there, and
+ *   the download URL would otherwise be served as `\tmp\tunnel\cloudflared`
+ *   (the ENOENT seen on Windows).
+ */
+const STATE_DIR =
+  process.platform === "win32"
+    ? path.join(process.env.LOCALAPPDATA ?? path.join(os.homedir(), "AppData", "Local"), "nova", "tunnel")
+    : path.join(os.tmpdir(), "tunnel");
+
+/** cloudflared binary name + download URL, per platform. */
+const BIN_NAME = process.platform === "win32" ? "cloudflared.exe" : "cloudflared";
+const DOWNLOAD_URL =
+  process.platform === "win32"
+    ? "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
+    : "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64";
+
+const BIN = path.join(STATE_DIR, BIN_NAME);
 const LOG_FILE = path.join(STATE_DIR, "tunnel.log");
 const URL_FILE = path.join(STATE_DIR, "PUBLIC_URL");
 const PID_FILE = path.join(STATE_DIR, "tunnel.pid");
-const DOWNLOAD_URL =
-  "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64";
 
 const CHECK_MS = 15_000;
 const MAX_CONSECUTIVE_RESTARTS = 4;
@@ -275,6 +293,14 @@ async function restartTunnel(port: number): Promise<void> {
 
 export function startTunnelSupervisor(): void {
   const port = Number.parseInt(process.env.PORT ?? "3000", 10) || 3000;
+
+  // Local Windows development has no need for a public tunnel, and spawning a
+  // downloaded binary there requires extra setup. The sandbox (Linux) is where
+  // the public URL matters.
+  if (process.platform === "win32") {
+    log("skipped on win32 — run scripts/tunnel.sh manually if you need a public URL");
+    return;
+  }
 
   try {
     mkdirSync(STATE_DIR, { recursive: true });
