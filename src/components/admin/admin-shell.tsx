@@ -8,6 +8,7 @@ import {
   Package,
   Layers,
   ShoppingCart,
+  Ticket,
   MessageSquare,
   Tag,
   FolderTree,
@@ -27,6 +28,7 @@ const nav = [
   { label: "Categories", href: "/admin/categories", icon: FolderTree },
   { label: "Collections", href: "/admin/collections", icon: Layers },
   { label: "Discounts", href: "/admin/discounts", icon: Tag },
+  { label: "Event Tickets", href: "/admin/tickets", icon: Ticket },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Reviews", href: "/admin/reviews", icon: MessageSquare },
 ];
