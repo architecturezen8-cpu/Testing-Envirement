@@ -238,16 +238,16 @@ export async function POST(request: Request) {
 
       // ---- Email the tickets (best effort; never blocks the order) ----
       if (issuedPasses.length) {
-        try {
-          await sendTicketEmail({
-            to: created.email,
-            orderNumber: created.number,
-            buyerName: shipping.fullName,
-            tickets: issuedPasses,
-          });
-        } catch (e) {
-          console.error("[checkout] ticket email failed", e);
-        }
+        // Deliberately NOT awaited: a slow or unreachable SMTP server must
+        // never delay the order confirmation. Failures are logged only.
+        void sendTicketEmail({
+          to: created.email,
+          orderNumber: created.number,
+          buyerName: shipping.fullName,
+          tickets: issuedPasses,
+        }).catch((e) =>
+          console.error("[checkout] ticket email failed:", e.message),
+        );
       }
 
       // ---- Decrement stock for each ordered item ----

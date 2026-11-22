@@ -33,6 +33,12 @@ function transport() {
     // this flag, so the same code works with Gmail, Resend, Brevo or SendGrid.
     secure: port === 465,
     auth: { user, pass },
+    // Never let a slow/unreachable mail server hold up an order. Networks
+    // without outbound access to the mail port would otherwise hang for 30s+.
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 12000,
+    dnsTimeout: 5000,
   });
 }
 

@@ -197,6 +197,25 @@ export default function AdminTicketsPage() {
     }
   };
 
+  const uploadForRow = async (file: File, productId: number) => {
+    setUploading(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("productId", String(productId));
+      const res = await fetch("/api/admin/tickets/image", { method: "POST", body: fd });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Upload failed");
+      flash("Thumbnail updated ✓");
+      fetchTickets();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const toggleTier = (t: string) => {
     if (!draft) return;
     setDraft({
@@ -537,14 +556,36 @@ export default function AdminTicketsPage() {
                   transition={{ duration: 0.3, delay: i * 0.04 }}
                   className="flex flex-wrap items-center gap-4 rounded-xl border border-white/12 bg-white/[0.03] p-4"
                 >
-                  {t.images?.[0] && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={t.images[0]}
-                      alt=""
-                      className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                  <label
+                    className="group relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded-lg border border-white/12"
+                    title="Click to upload the ticket artwork"
+                  >
+                    {t.images?.[0] ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={t.images[0]}
+                        alt=""
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-stone-400">
+                        <Ticket className="h-5 w-5" />
+                      </span>
+                    )}
+                    <span className="absolute inset-0 hidden items-center justify-center bg-ink/70 text-[9px] font-semibold uppercase text-white group-hover:flex">
+                      Upload
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadForRow(f, t.id);
+                        e.target.value = "";
+                      }}
                     />
-                  )}
+                  </label>
 
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-stone-950">{t.name}</p>

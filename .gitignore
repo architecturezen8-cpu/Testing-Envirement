@@ -1,27 +1,25 @@
+
 # dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# next.js
-.next/
-out/
-build/
-next-env.d.ts
-
 # env
+# logs
+# misc
+# next.js
+*.log
+*.pem
+.DS_Store
 .env
 .env*.local
-
-# logs
-*.log
+.next/
+.pnp
+.pnp.js
+.turbo
+.vercel
+build/
+next-env.d.ts
+node_modules/
 npm-debug.log*
+out/
+scripts/env.template
+tsconfig.tsbuildinfo
 yarn-debug.log*
 yarn-error.log*
-
-# misc
-.DS_Store
-*.pem
-.vercel
-.turbo
-tsconfig.tsbuildinfo

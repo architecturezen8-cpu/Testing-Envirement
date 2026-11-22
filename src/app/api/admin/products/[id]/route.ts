@@ -99,9 +99,16 @@ export async function PUT(
 
     // Sync variants: ensure every size × color combination exists.
     // Keep existing stock values; create new combos with stock=0; delete removed combos.
+    //
+    // Event tickets carry no colours, so the size × colour grid would be empty
+    // and would delete every tier. Give them one variant per tier instead,
+    // using the same synthetic colour value the storefront expects.
+    const effectiveColors =
+      colors.length > 0 ? colors : [{ name: "—", value: "#000000" }];
+
     const newCombos: { size: string; color: string }[] = [];
     for (const size of sizes) {
-      for (const color of colors) {
+      for (const color of effectiveColors) {
         newCombos.push({ size, color: color.name });
       }
     }
