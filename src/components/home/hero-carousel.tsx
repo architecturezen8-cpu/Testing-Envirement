@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const SLIDES = [
-  { src: "/images/school-1.jpg", alt: "St. Thomas' College Matale — the college building" },
-  { src: "/images/school-2.jpg", alt: "St. Thomas' College Matale — students" },
-  { src: "/images/school-3.jpg", alt: "St. Thomas' College Matale — merchandise" },
-];
+export type HeroSlide = { imageUrl: string; alt: string };
 
-const SLIDE_MS = 6500;
+const FALLBACK_SLIDES: HeroSlide[] = [
+  { imageUrl: "/images/school-1.jpg", alt: "St. Thomas' College Matale — the college building" },
+  { imageUrl: "/images/school-2.jpg", alt: "St. Thomas' College Matale — students" },
+  { imageUrl: "/images/school-3.jpg", alt: "St. Thomas' College Matale — merchandise" },
+];
 
 /* Shared easing — the same luxury curve used across the site. */
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -22,28 +22,36 @@ const rise = (delay: number) => ({
   transition: { duration: 1.15, delay, ease: EASE },
 });
 
-export function HeroCarousel() {
+export function HeroCarousel({
+  slides = FALLBACK_SLIDES,
+  intervalMs = 6500,
+}: {
+  slides?: HeroSlide[];
+  intervalMs?: number;
+}) {
+  // Never render an empty hero — the admin can remove slides, so guard it.
+  const SLIDES = slides.length ? slides : FALLBACK_SLIDES;
   const [index, setIndex] = useState(0);
 
-  const next = useCallback(() => setIndex((i) => (i + 1) % SLIDES.length), []);
+  const next = useCallback(() => setIndex((i) => (i + 1) % SLIDES.length), [SLIDES.length]);
 
   useEffect(() => {
-    const t = window.setInterval(next, SLIDE_MS);
+    const t = window.setInterval(next, intervalMs);
     return () => window.clearInterval(t);
-  }, [next]);
+  }, [next, intervalMs]);
 
   return (
     <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden">
       {/* ---- Cross-fading image stack ---- */}
       {SLIDES.map((slide, i) => (
         <div
-          key={slide.src}
+          key={slide.imageUrl}
           className="absolute inset-0 transition-opacity duration-[2400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
           style={{ opacity: i === index ? 1 : 0 }}
           aria-hidden={i !== index}
         >
           <Image
-            src={slide.src}
+            src={slide.imageUrl}
             alt={i === index ? slide.alt : ""}
             fill
             priority={i === 0}
@@ -124,7 +132,7 @@ export function HeroCarousel() {
         <motion.div {...rise(0.8)} className="flex items-center gap-3">
           {SLIDES.map((s, i) => (
             <button
-              key={s.src}
+              key={s.imageUrl}
               onClick={() => setIndex(i)}
               aria-label={`Show slide ${i + 1}`}
               className={`h-[2px] rounded-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${

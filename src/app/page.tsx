@@ -6,54 +6,62 @@ import { desc, eq, sql } from "drizzle-orm";
 import { ProductCard } from "@/components/product/product-card";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 import { HeroCarousel } from "@/components/home/hero-carousel";
+import {
+  getHomeConfig,
+  getFeaturedProducts,
+  getCollectionCards,
+  type Testimonial as ConfigTestimonial,
+} from "@/lib/home-config";
 
 export const dynamic = "force-dynamic";
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "The quality of the college merchandises is outstanding — the crest embroidery is beautiful and the fit is perfect.",
-    author: "Dinesh P.",
-    location: "Old Boys' Union",
-  },
-  {
-    quote:
-      "Ordered event tickets and a polo set for the big match. Everything arrived quickly and beautifully packed.",
-    author: "Nimesha R.",
-    location: "Parent, Grade 9",
-  },
-  {
-    quote:
-      "Wearing the college colours feels different when it is made this well. Proud to be a Thomian.",
-    author: "Sanula W.",
-    location: "Student, Grade 13",
-  },
-];
+
 
 const CREST_MOTTO = {
   title: "Animo Et Fide",
   translation: "Courage & Faith",
 };
 
-export default async function HomePage() {
-  const featuredCollections = await db
-    .select()
-    .from(collections)
-    .where(eq(collections.featured, true))
-    .orderBy(collections.sortOrder);
+/** Shown until the admin adds testimonials in Home page setup. */
+const TESTIMONIAL_FALLBACK = [
+  {
+    quote:
+      "The quality of the college merchandises is outstanding — the crest embroidery is beautiful and the fit is perfect.",
+    author: "Dinesh P.",
+    role: "Old Boys' Union",
+  },
+  {
+    quote:
+      "Ordered event tickets and a polo set for the big match. Everything arrived quickly and beautifully packed.",
+    author: "Nimesha R.",
+    role: "Parent, Grade 9",
+  },
+  {
+    quote:
+      "Wearing the college colours feels different when it is made this well. Proud to be a Thomian.",
+    author: "Sanula W.",
+    role: "Student, Grade 13",
+  },
+];
 
-  const featuredProducts = await db
-    .select()
-    .from(products)
-    .orderBy(desc(products.badge), desc(products.createdAt))
-    .limit(4);
+export default async function HomePage() {
+  const [homeConfig, featuredProducts, collectionCards] = await Promise.all([
+    getHomeConfig(),
+    getFeaturedProducts(),
+    getCollectionCards(),
+  ]);
+
+  const testimonials: ConfigTestimonial[] =
+    homeConfig.testimonials.length > 0
+      ? homeConfig.testimonials
+      : TESTIMONIAL_FALLBACK;
 
   const productCount = await db.select({ c: sql`count(*)` }).from(products);
 
   return (
     <>
       {/* ===== HERO — cinematic college imagery ===== */}
-      <HeroCarousel />
+      <HeroCarousel slides={homeConfig.heroSlides} intervalMs={homeConfig.heroIntervalMs} />
 
       {/* ===== FEATURED COLLECTIONS — Everything a Thomian needs ===== */}
       <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-10 lg:py-32">
@@ -70,18 +78,20 @@ export default async function HomePage() {
         </AnimatedSection>
 
         <StaggerContainer className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredCollections.map((collection, idx) => (
-            <StaggerItem key={collection.id}>
+          {collectionCards.map((card, idx) => (
+            <StaggerItem key={`${card.label}-${idx}`}>
               <Link
-                href={`/shop?collection=${collection.slug}`}
+                href={card.href}
                 className={`group relative flex h-full min-h-[320px] flex-col justify-end overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel ${
-                  idx === 0 ? "lg:row-span-2 lg:min-h-[460px]" : ""
+                  idx === 0 && collectionCards.length > 2
+                    ? "lg:row-span-2 lg:min-h-[460px]"
+                    : ""
                 }`}
               >
-                {collection.image ? (
+                {card.imageUrl ? (
                   <Image
-                    src={collection.image}
-                    alt={collection.name}
+                    src={card.imageUrl}
+                    alt={card.label}
                     fill
                     className="object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
                     sizes="(max-width: 1024px) 50vw, 33vw"
@@ -89,15 +99,11 @@ export default async function HomePage() {
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
                 <div className="relative z-10 p-7 text-paper">
-                  <p className="text-[10px] uppercase tracking-luxe text-paper/60">
-                    College store
-                  </p>
-                  <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">
-                    {collection.name}
-                  </h3>
-                  {collection.description && (
+                  <p className="text-[10px] uppercase tracking-luxe text-paper/60">College store</p>
+                  <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">{card.label}</h3>
+                  {card.description && (
                     <p className="mt-2 max-w-xs text-sm leading-relaxed text-paper/65">
-                      {collection.description}
+                      {card.description}
                     </p>
                   )}
                   <span className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-wide-2 text-paper/90 transition-all duration-500 group-hover:gap-4">
@@ -194,7 +200,7 @@ export default async function HomePage() {
             </div>
           </AnimatedSection>
           <StaggerContainer className="grid gap-6 md:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
+            {testimonials.map((t) => (
               <StaggerItem key={t.author} className="h-full">
                 <div className="flex h-full flex-col rounded-2xl border border-ink/8 bg-paper bg-sheen-light ring-1 ring-inset ring-panel p-8">
                   <div className="mb-4 flex gap-0.5 text-accent">
@@ -207,7 +213,7 @@ export default async function HomePage() {
                   </p>
                   <div className="mt-6 border-t border-ink/8 pt-4">
                     <p className="font-medium text-ink">{t.author}</p>
-                    <p className="text-xs text-stone-500">{t.location}</p>
+                    <p className="text-xs text-stone-500">{t.role}</p>
                   </div>
                 </div>
               </StaggerItem>

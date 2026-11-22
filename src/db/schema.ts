@@ -220,3 +220,55 @@ export type Notification = typeof notifications.$inferSelect;
 export type DiscountCode = typeof discountCodes.$inferSelect;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type Category = typeof categories.$inferSelect;
+
+/* =====================================================================
+   HOME PAGE SETUP (admin-controlled)
+   One row (id = 1) holds everything the storefront home page renders.
+   Keeping it as a single JSONB-backed row means the admin can rearrange
+   sections without new migrations, while product/collection references
+   stay as IDs so the live data always comes from the catalogue.
+   ===================================================================== */
+
+export const homepageConfig = pgTable("homepage_config", {
+  id: integer("id").primaryKey().default(1),
+
+  /** Hero carousel slides, in display order. */
+  heroSlides: jsonb("hero_slides")
+    .$type<{ imageUrl: string; alt: string; eyebrow?: string; title?: string; subtitle?: string }[]>()
+    .notNull()
+    .default([]),
+
+  /** How long each hero slide stays on screen. */
+  heroIntervalMs: integer("hero_interval_ms").notNull().default(6500),
+
+  /** "Everything a Thomian needs" cards — existing collections and/or custom links. */
+  collectionCards: jsonb("collection_cards")
+    .$type<{
+      label: string;
+      href: string;
+      imageUrl?: string | null;
+      collectionId?: number | null;
+      description?: string | null;
+    }[]>()
+    .notNull()
+    .default([]),
+
+  /** "Most popular" — product IDs in display order (resolved from the catalogue). */
+  featuredProductIds: jsonb("featured_product_ids").$type<number[]>().notNull().default([]),
+
+  /** "Our community" — reviews pulled in as testimonials, or written by hand. */
+  testimonials: jsonb("testimonials")
+    .$type<{ quote: string; author: string; role: string; sourceReviewId?: number | null }[]>()
+    .notNull()
+    .default([]),
+
+  /** Header navigation, fully editable. */
+  navLinks: jsonb("nav_links")
+    .$type<{ label: string; href: string; children?: { label: string; href: string }[] }[]>()
+    .notNull()
+    .default([]),
+
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+});
+
+export type HomepageConfig = typeof homepageConfig.$inferSelect;

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
+  Home,
   Package,
   Layers,
   ShoppingCart,
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Home page setup", href: "/admin/home", icon: Home },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Stock Preview", href: "/admin/stock", icon: Boxes },
   { label: "Categories", href: "/admin/categories", icon: FolderTree },
