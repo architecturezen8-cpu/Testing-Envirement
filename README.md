@@ -145,6 +145,27 @@ production than a personal Gmail account, which has a ~500 messages/day limit.
 
 ## Local setup troubleshooting
 
+### `Module not found: Can't resolve 'nodemailer' / 'qrcode'`
+
+These two packages power ticket QR codes and ticket emails. **`git pull` only
+brings code — it does not install packages.** After pulling, run:
+
+```bash
+npm install
+npm run build
+```
+
+Both packages are already listed in `package.json`, so a plain `npm install`
+is enough. If it still fails, delete the lockfile state and reinstall:
+
+```bash
+rmdir /s /q node_modules   # Windows
+rm -rf node_modules        # macOS / Linux
+del package-lock.json      # Windows
+rm package-lock.json       # macOS / Linux
+npm install
+```
+
 ### Admin "Event Tickets" section missing
 
 The section lives at `/admin/tickets` and appears in the admin sidebar. If it
@@ -175,8 +196,7 @@ is not there:
    src/app/admin/(dashboard)/tickets/page.tsx
    ```
 
-If it is there and the build succeeds, `/admin/tickets` will work. Note the
-admin section **is separate** from "Products" — tickets are created under
+The admin section **is separate** from "Products" — tickets are created under
 **Event Tickets** in the sidebar, with the event name, date, venue and tier
 fields.
 
