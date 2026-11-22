@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { products } from "@/db/schema";
+import { products, ticketThumbnails } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
 
   const file = form.get("file");
   const productId = Number(form.get("productId"));
+  /** "artwork" = the printed design the QR is drawn onto; "thumbnail" = the
+   *  photo shoppers see in the shop grid. */
+  const target = form.get("target") === "thumbnail" ? "thumbnail" : "artwork";
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -63,6 +66,19 @@ export async function POST(request: NextRequest) {
   // immediately without restarting the server.
   const url = `/api/uploads/tickets/${name}`;
 
+  if (target === "thumbnail") {
+    // Reference photo for the shop grid — the ticket artwork is left alone.
+    await db
+      .insert(ticketThumbnails)
+      .values({ productId, imageUrl: url })
+      .onConflictDoUpdate({
+        target: ticketThumbnails.productId,
+        set: { imageUrl: url, updatedAt: new Date() },
+      });
+
+    return NextResponse.json({ ok: true, url, target });
+  }
+
   // Store as the first image so it becomes the ticket's artwork everywhere.
   const [existing] = await db
     .select({ images: products.images })
@@ -75,5 +91,5 @@ export async function POST(request: NextRequest) {
 
   await db.update(products).set({ images }).where(eq(products.id, productId));
 
-  return NextResponse.json({ ok: true, url, images });
+  return NextResponse.json({ ok: true, url, images, target });
 }

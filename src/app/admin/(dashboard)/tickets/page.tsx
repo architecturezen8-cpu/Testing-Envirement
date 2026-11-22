@@ -56,6 +56,8 @@ export default function AdminTicketsPage() {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   // A file picked before the ticket exists is kept here and uploaded right after creation.
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  // Reference photo shown to shoppers in the grid (separate from the artwork).
+  const [thumbUrl, setThumbUrl] = useState<string | null>(null);
 
   const fetchTickets = () => {
     setLoading(true);
@@ -80,6 +82,7 @@ export default function AdminTicketsPage() {
     setDraft(EMPTY);
     setError("");
     setUploadedUrl(null);
+    setThumbUrl(null);
     setPendingFile(null);
   };
 
@@ -161,7 +164,7 @@ export default function AdminTicketsPage() {
       // the product id.
       const createdId = editingId ?? data.id;
       if (pendingFile && createdId) {
-        await uploadArtwork(pendingFile, createdId);
+        await uploadImage(pendingFile, createdId, "artwork");
       } else {
         setDraft(null);
         setEditingId(null);
@@ -181,22 +184,33 @@ export default function AdminTicketsPage() {
     fetchTickets();
   };
 
-  const uploadArtwork = async (file: File, productId: number) => {
+  const uploadImage = async (
+    file: File,
+    productId: number,
+    target: "artwork" | "thumbnail",
+  ) => {
     setUploading(true);
     setError("");
     try {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("productId", String(productId));
+      fd.append("target", target);
       const res = await fetch("/api/admin/tickets/image", { method: "POST", body: fd });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error ?? "Upload failed");
-      setUploadedUrl(d.url);
-      setDraft((prev) =>
-        prev ? { ...prev, images: [d.url, ...prev.images.filter((i) => i !== d.url)] } : prev,
-      );
-      setPendingFile(null);
-      flash("Artwork uploaded ✓");
+
+      if (target === "thumbnail") {
+        setThumbUrl(d.url);
+        flash("Thumbnail uploaded ✓");
+      } else {
+        setUploadedUrl(d.url);
+        setDraft((prev) =>
+          prev ? { ...prev, images: [d.url, ...prev.images.filter((i) => i !== d.url)] } : prev,
+        );
+        setPendingFile(null);
+        flash("Ticket artwork uploaded ✓");
+      }
       fetchTickets();
     } catch (e) {
       setError((e as Error).message);
@@ -212,6 +226,7 @@ export default function AdminTicketsPage() {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("productId", String(productId));
+      fd.append("target", "thumbnail");
       const res = await fetch("/api/admin/tickets/image", { method: "POST", body: fd });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error ?? "Upload failed");
@@ -294,62 +309,131 @@ export default function AdminTicketsPage() {
                   detected automatically and the buyer&apos;s QR is drawn there.
                 </p>
 
-                <div className="mt-4 flex flex-wrap items-center gap-4">
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-cta-accent px-5 py-2.5 text-xs font-semibold text-accent-ink">
-                    {uploading ? "Uploading…" : pendingFile ? "Change image" : "Choose image"}
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (!f) return;
-                        if (editingId) {
-                          // Ticket already exists — upload straight away.
-                          uploadArtwork(f, editingId);
-                        } else {
-                          // Ticket not created yet — hold it, it is uploaded
-                          // automatically right after "Create ticket".
-                          setPendingFile(f);
-                          setUploadedUrl(URL.createObjectURL(f));
-                        }
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {/* ---- Artwork upload ---- */}
+                  <div className="rounded-xl border border-white/12 bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-950">
+                      Upload ticket artwork
+                    </p>
+                    <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full bg-cta-accent px-5 py-2.5 text-xs font-semibold text-accent-ink">
+                      {uploading ? "Uploading…" : pendingFile ? "Change artwork" : "Choose artwork"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          if (editingId) {
+                            uploadImage(f, editingId, "artwork");
+                          } else {
+                            setPendingFile(f);
+                            setUploadedUrl(URL.createObjectURL(f));
+                          }
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {uploadedUrl && !pendingFile && (
+                      <p className="mt-2 text-xs text-green-700">Artwork saved ✓</p>
+                    )}
+                    {pendingFile && !editingId && (
+                      <p className="mt-2 text-xs text-stone-400">
+                        Will be saved when you create the ticket
+                      </p>
+                    )}
+                  </div>
 
-                  {uploadedUrl && <span className="text-xs text-green-700">Artwork ready ✓</span>}
-                  {pendingFile && !editingId && (
-                    <span className="text-xs text-stone-400">
-                      Saved with the ticket when you create it
-                    </span>
-                  )}
-                  {uploading && <span className="text-xs text-stone-400">Uploading…</span>}
+                  {/* ---- Thumbnail upload ---- */}
+                  <div className="rounded-xl border border-white/12 bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-950">
+                      Upload thumbnail
+                    </p>
+                    <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-accent/50 px-5 py-2.5 text-xs font-semibold text-accent">
+                      Choose thumbnail
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          if (editingId) {
+                            uploadImage(f, editingId, "thumbnail");
+                          } else {
+                            setThumbUrl(URL.createObjectURL(f));
+                            flash("Save the ticket first to keep the thumbnail");
+                            e.target.value = "";
+                          }
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {thumbUrl && (
+                      <p className="mt-2 text-xs text-green-700">Thumbnail saved ✓</p>
+                    )}
+                  </div>
                 </div>
 
-                {uploadedUrl && (
-                  <div className="mt-4 flex flex-wrap gap-5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={uploadedUrl}
-                      alt="Ticket artwork preview"
-                      className="h-44 rounded-lg border border-white/12 object-contain"
-                    />
-                    <div className="max-w-xs text-xs text-stone-400">
-                      <p className="font-medium text-stone-950">QR placement</p>
-                      <p className="mt-1">
-                        The storefront scans this image for the largest white square and paints the
-                        buyer&apos;s unique QR over it.
+                {(uploadedUrl || thumbUrl) && (
+                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                    {/* ---- Ticket artwork ---- */}
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-950">
+                        1 · Ticket artwork
                       </p>
-                      <p className="mt-2">
-                        No white square? The QR falls back to the right-hand stub.
+                      <p className="mt-1 text-xs text-stone-400">
+                        The printed design. QR is drawn over the white square.
                       </p>
-                      <p className="mt-2 text-stone-950">
-                        Tip: keep the square plain white and at least a quarter of the ticket wide.
+                      {uploadedUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={uploadedUrl}
+                          alt="Ticket artwork"
+                          className="mt-3 h-40 rounded-lg border border-white/12 object-contain"
+                        />
+                      ) : (
+                        <div className="mt-3 flex h-40 items-center justify-center rounded-lg border border-dashed border-white/12 text-xs text-stone-400">
+                          Not uploaded
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ---- Reference thumbnail ---- */}
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-950">
+                        2 · Thumbnail (shop grid)
                       </p>
+                      <p className="mt-1 text-xs text-stone-400">
+                        The photo shoppers see in the shop and tickets lists.
+                      </p>
+                      {thumbUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={thumbUrl}
+                          alt="Reference thumbnail"
+                          className="mt-3 h-40 rounded-lg border border-white/12 object-cover"
+                        />
+                      ) : (
+                        <div className="mt-3 flex h-40 items-center justify-center rounded-lg border border-dashed border-white/12 text-xs text-stone-400">
+                          Not uploaded
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
+
+                <div className="mt-4 text-xs text-stone-400">
+                  <p className="font-medium text-stone-950">QR placement</p>
+                  <p className="mt-1">
+                    The storefront scans the artwork for the largest white square and paints the
+                    buyer&apos;s unique QR over it — sized to fit inside, never overflowing.
+                  </p>
+                  <p className="mt-2">
+                    No white square? The QR falls back to the right-hand stub. Keep the square plain
+                    white and at least a quarter of the ticket wide.
+                  </p>
+                </div>
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">

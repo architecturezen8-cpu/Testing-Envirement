@@ -1,5 +1,10 @@
 import sharp from "sharp";
 import QRCode from "qrcode";
+import { readFile } from "node:fs";
+import { promisify } from "node:util";
+
+const readFileAsync = promisify(readFile);
+import path from "node:path";
 
 /**
  * Builds the full ticket pass image (artwork with the QR composited over it).
@@ -21,14 +26,25 @@ export type PassTicket = {
 
 /** Fetches the uploaded artwork through the local upload route. */
 async function loadArtwork(url: string): Promise<Buffer> {
-  const filePath = url.replace("/api/uploads/", "").replace("/uploads/", "");
-  const res = await fetch(
-    `http://127.0.0.1:${process.env.PORT ?? 3000}/api/uploads/${filePath}`,
-  );
-  if (!res.ok) throw new Error("artwork unavailable");
-  return sharp(Buffer.from(await res.arrayBuffer()), { failOn: "none" })
-    .png()
-    .toBuffer();
+  // Only uploaded artwork is fetched this way; it always lives in
+  // public/uploads/tickets and is a bare filename.
+  const fileName = path.basename(url);
+  const full = path.join(process.cwd(), "public", "uploads", "tickets", fileName);
+
+  try {
+    const raw = await readFileAsync(full);
+    // Re-encode so a slightly malformed upload still composites cleanly.
+    return await sharp(raw, { failOn: "none" }).png().toBuffer();
+  } catch (e) {
+    // Fall back to fetching through the upload route (hosted deployments).
+    const res = await fetch(
+      `http://127.0.0.1:${process.env.PORT ?? 3000}/api/uploads/${fileName}`,
+    );
+    if (!res.ok) throw new Error("artwork unavailable");
+    return sharp(Buffer.from(await res.arrayBuffer()), { failOn: "none" })
+      .png()
+      .toBuffer();
+  }
 }
 
 /** Finds the largest near-white rectangle, in source pixel coordinates. */
@@ -199,33 +215,39 @@ export async function renderTicketPass(
       const height = meta.height ?? Math.round(width * 1.25);
 
       const square = await findWhiteSquare(await base.toBuffer(), width, height);
+
+      // The QR has to sit INSIDE the white square the artwork leaves for it.
+      // Take the smaller of the square's two dimensions (so a tall thin block
+      // still yields a square QR) and keep a little padding around it.
+      const fitSize = Math.min(square.width, square.height);
       const qrSize = Math.max(
-        120,
-        Math.round(Math.min(square.width, square.height, Math.min(width, height)) * 0.9),
+        96,
+        Math.round(fitSize * 0.82),
       );
+
+      // Clamp to the artwork bounds.
+      const maxByArt = Math.min(width, height);
+      const finalSize = Math.min(qrSize, maxByArt);
+
       const qrResized = await sharp(qrBuffer)
-        .resize(qrSize, qrSize, { fit: "contain", background: "#ffffff" })
+        .resize(finalSize, finalSize, { fit: "contain", background: "#ffffff" })
         .png()
         .toBuffer();
 
+      // Centred on the square, then clamped so the QR never runs off the edge.
+      let left = Math.round(square.left + square.width / 2 - finalSize / 2);
+      let top = Math.round(square.top + square.height / 2 - finalSize / 2);
+      left = Math.max(0, Math.min(left, width - finalSize));
+      top = Math.max(0, Math.min(top, height - finalSize));
+
       return await base
         .composite([
-          {
-            input: qrResized,
-            left: Math.max(
-              0,
-              Math.round(square.left + square.width / 2 - qrSize / 2),
-            ),
-            top: Math.max(
-              0,
-              Math.round(square.top + square.height / 2 - qrSize / 2),
-            ),
-          },
+          { input: qrResized, left, top },
         ])
         .png()
         .toBuffer();
     } catch (e) {
-      console.error("[ticket-pass] artwork compositing failed:", (e as Error).message);
+      console.error("[ticket-pass] artwork compositing failed:", (e as Error).message, "\nSTACK:", (e as Error).stack?.split("\n").slice(0,4).join(" <- "));
     }
   }
 

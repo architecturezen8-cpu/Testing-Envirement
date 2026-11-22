@@ -277,6 +277,21 @@ export type HomepageConfig = typeof homepageConfig.$inferSelect;
    ISSUED TICKETS — one row per ticket bought, each with a unique QR.
    ===================================================================== */
 
+/**
+ * Reference thumbnail: the photo shoppers see in the shop/tickets grid, kept
+ * separate from the ticket artwork (which is the printed design the QR is
+ * drawn onto).
+ */
+export const ticketThumbnails = pgTable("ticket_thumbnails", {
+  productId: integer("product_id")
+    .primaryKey()
+    .references(() => products.id, { onDelete: "cascade" }),
+  imageUrl: text("image_url").notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+});
+
+export type TicketThumbnail = typeof ticketThumbnails.$inferSelect;
+
 export const issuedTickets = pgTable("issued_tickets", {
   id: serial("id").primaryKey(),
 

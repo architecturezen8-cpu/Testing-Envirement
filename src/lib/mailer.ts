@@ -16,8 +16,8 @@ type Ticket = {
   tier: string;
   attendeeName: string;
   quantity: number;
-  /** Full ticket pass (artwork + QR composited), as a data URL. */
-  pass: string;
+  /** Full ticket pass (artwork + QR composited) as PNG bytes. */
+  pass: Buffer;
 };
 
 function transport() {
@@ -72,7 +72,7 @@ export async function sendTicketEmail({
           </p>
         </td>
         <td style="padding:14px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-          <img src="${t.pass}" alt="Ticket ${t.ticketCode}" width="180"
+          <img src="cid:${t.ticketCode}" alt="Ticket ${t.ticketCode}" width="180"
                style="display:inline-block;border:1px solid #e5e7eb;border-radius:8px;" />
           <p style="margin:6px 0 0;font:400 10px Arial,sans-serif;color:#6b7280;">
             Show this at the gate
@@ -116,6 +116,13 @@ export async function sendTicketEmail({
     to,
     subject: `Your tickets — order ${orderNumber}`,
     html,
+    attachments: tickets.map((t) => ({
+      // Embedded in the HTML above via cid:, not rendered as base64 text.
+      filename: `${t.ticketCode}.png`,
+      content: t.pass,
+      cid: t.ticketCode,
+      contentType: "image/png",
+    })),
   });
 
   return { sent: true };

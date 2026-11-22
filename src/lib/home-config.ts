@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { homepageConfig, products, collections } from "@/db/schema";
+import { homepageConfig, products, collections, ticketThumbnails } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export type HeroSlide = {

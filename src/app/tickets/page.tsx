@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/db";
-import { collections, products } from "@/db/schema";
+import { collections, products, ticketThumbnails } from "@/db/schema";
 import { and, eq, desc } from "drizzle-orm";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 import { formatPrice } from "@/lib/utils";
@@ -18,11 +18,17 @@ export const metadata: Metadata = {
 };
 
 export default async function TicketsPage() {
-  const ticketProducts = await db
-    .select()
-    .from(products)
-    .where(eq(products.category, "Event Tickets"))
-    .orderBy(desc(products.badge), products.price);
+  const [ticketProducts, thumbs] = await Promise.all([
+    db
+      .select()
+      .from(products)
+      .where(eq(products.category, "Event Tickets"))
+      .orderBy(desc(products.badge), products.price),
+    db.select().from(ticketThumbnails),
+  ]);
+
+  const thumbnailFor = (id: number) =>
+    thumbs.find((t) => t.productId === id)?.imageUrl ?? null;
 
   const ticketCollection = await db
     .select()
@@ -121,6 +127,7 @@ export default async function TicketsPage() {
                     venue={t.description.split("Venue: ")[1]?.split("\n")[0] ?? "College grounds"}
                     tier={t.description.split("Tier: ")[1]?.split("\n")[0] ?? "General"}
                     price={formatPrice(t.price)}
+                    thumbnail={thumbnailFor(t.id)}
                   />
                 </div>
 

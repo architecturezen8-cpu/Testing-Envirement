@@ -15,6 +15,8 @@ type TicketCardProps = {
   venue: string;
   tier: string;
   price: string;
+  /** Reference photo shown to shoppers in the grid (not printed on the pass). */
+  thumbnail?: string | null;
   accent?: string;
   className?: string;
 };
@@ -25,6 +27,7 @@ export function TicketCard({
   venue,
   tier,
   price,
+  thumbnail,
   accent = "#f4be38",
   className = "",
 }: TicketCardProps) {

@@ -207,7 +207,7 @@ export async function POST(request: Request) {
         quantity: number;
         seat: number;
         seats: number;
-        pass: string;
+        pass: Buffer;
       }[] = [];
 
       for (const line of ticketLines) {
@@ -264,9 +264,16 @@ export async function POST(request: Request) {
               status: "valid",
             },
             ticketArtwork.get(line.productId) ?? null,
-          ).catch(() =>
-            makeQrDataUrl(qrPayload(ticketCode)).then((qr) => qr.replace("data:image/png;base64,", "")),
-          );
+          ).catch(async () => {
+            // Pass rendering failed — fall back to a plain QR image.
+            const QRCode = (await import("qrcode")).default;
+            return QRCode.toBuffer(qrPayload(ticketCode), {
+              errorCorrectionLevel: "M",
+              margin: 2,
+              width: 600,
+              color: { dark: "#0b1220", light: "#ffffff" },
+            });
+          });
 
           issuedPasses.push({
             ticketCode,
@@ -278,7 +285,7 @@ export async function POST(request: Request) {
             quantity: 1,
             seat,
             seats: people,
-            pass: `data:image/png;base64,${pass.toString("base64")}`,
+            pass,
           });
         }
       }
