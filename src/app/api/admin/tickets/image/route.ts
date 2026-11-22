@@ -59,7 +59,9 @@ export async function POST(request: NextRequest) {
   const bytes = new Uint8Array(await file.arrayBuffer());
   writeFileSync(path.join(dir, name), bytes);
 
-  const url = `/uploads/tickets/${name}`;
+  // Served through an API route rather than /public, so an upload is visible
+  // immediately without restarting the server.
+  const url = `/api/uploads/tickets/${name}`;
 
   // Store as the first image so it becomes the ticket's artwork everywhere.
   const [existing] = await db

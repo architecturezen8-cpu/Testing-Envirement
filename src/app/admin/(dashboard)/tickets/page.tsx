@@ -51,6 +51,8 @@ export default function AdminTicketsPage() {
   const [message, setMessage] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  // A file picked before the ticket exists is kept here and uploaded right after creation.
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const fetchTickets = () => {
     setLoading(true);
@@ -75,6 +77,7 @@ export default function AdminTicketsPage() {
     setDraft(EMPTY);
     setError("");
     setUploadedUrl(null);
+    setPendingFile(null);
   };
 
   const openEdit = (t: Product) => {
@@ -148,8 +151,17 @@ export default function AdminTicketsPage() {
       if (!res.ok) throw new Error(data.error ?? "Save failed");
 
       flash(editingId ? "Ticket updated ✓" : "Ticket created ✓");
-      setDraft(null);
-      setEditingId(null);
+
+      // A file chosen before the ticket existed is uploaded now that we know
+      // the product id.
+      const createdId = editingId ?? data.id;
+      if (pendingFile && createdId) {
+        await uploadArtwork(pendingFile, createdId);
+      } else {
+        setDraft(null);
+        setEditingId(null);
+      }
+
       fetchTickets();
     } catch (e) {
       setError((e as Error).message);
@@ -164,22 +176,18 @@ export default function AdminTicketsPage() {
     fetchTickets();
   };
 
-  const uploadArtwork = async (file: File) => {
-    if (!editingId) {
-      setError("Save the ticket first, then upload the artwork.");
-      return;
-    }
+  const uploadArtwork = async (file: File, productId: number) => {
     setUploading(true);
     setError("");
     try {
       const fd = new FormData();
       fd.append("file", file);
-      fd.append("productId", String(editingId));
+      fd.append("productId", String(productId));
       const res = await fetch("/api/admin/tickets/image", { method: "POST", body: fd });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error ?? "Upload failed");
       setUploadedUrl(d.url);
-      setDraft((prev) => (prev ? { ...prev } : prev));
+      setPendingFile(null);
       flash("Artwork uploaded ✓");
       fetchTickets();
     } catch (e) {
@@ -259,47 +267,58 @@ export default function AdminTicketsPage() {
                   detected automatically and the buyer&apos;s QR is drawn there.
                 </p>
 
-                {editingId ? (
-                  <div className="mt-4 flex flex-wrap items-center gap-4">
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-cta-accent px-5 py-2.5 text-xs font-semibold text-accent-ink">
-                      {uploading ? "Uploading…" : "Upload image"}
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) uploadArtwork(f);
-                          e.target.value = "";
-                        }}
-                      />
-                    </label>
-                    {uploadedUrl && (
-                      <span className="text-xs text-green-700">Artwork saved ✓</span>
-                    )}
-                  </div>
-                ) : (
-                  <p className="mt-4 text-xs text-stone-400">
-                    Save the ticket once, then upload the artwork here.
-                  </p>
-                )}
+                <div className="mt-4 flex flex-wrap items-center gap-4">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-cta-accent px-5 py-2.5 text-xs font-semibold text-accent-ink">
+                    {uploading ? "Uploading…" : pendingFile ? "Change image" : "Choose image"}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        if (editingId) {
+                          // Ticket already exists — upload straight away.
+                          uploadArtwork(f, editingId);
+                        } else {
+                          // Ticket not created yet — hold it, it is uploaded
+                          // automatically right after "Create ticket".
+                          setPendingFile(f);
+                          setUploadedUrl(URL.createObjectURL(f));
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+
+                  {uploadedUrl && <span className="text-xs text-green-700">Artwork ready ✓</span>}
+                  {pendingFile && !editingId && (
+                    <span className="text-xs text-stone-400">
+                      Saved with the ticket when you create it
+                    </span>
+                  )}
+                  {uploading && <span className="text-xs text-stone-400">Uploading…</span>}
+                </div>
 
                 {uploadedUrl && (
-                  <div className="mt-4 flex flex-wrap gap-4">
+                  <div className="mt-4 flex flex-wrap gap-5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={uploadedUrl}
                       alt="Ticket artwork preview"
-                      className="h-40 rounded-lg border border-white/12 object-contain"
+                      className="h-44 rounded-lg border border-white/12 object-contain"
                     />
                     <div className="max-w-xs text-xs text-stone-400">
                       <p className="font-medium text-stone-950">QR placement</p>
                       <p className="mt-1">
                         The storefront scans this image for the largest white square and paints the
-                        buyer&apos;s QR over it, with a small scene behind the code.
+                        buyer&apos;s unique QR over it.
                       </p>
                       <p className="mt-2">
                         No white square? The QR falls back to the right-hand stub.
+                      </p>
+                      <p className="mt-2 text-stone-950">
+                        Tip: keep the square plain white and at least a quarter of the ticket wide.
                       </p>
                     </div>
                   </div>
