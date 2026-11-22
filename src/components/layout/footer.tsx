@@ -51,10 +51,10 @@ export function Footer() {
         <div>
           <h4 className="text-[11px] uppercase tracking-wide-2 text-paper/40">College store</h4>
           <ul className="mt-4 space-y-2.5 text-sm text-paper/70">
-            <li><Link href="/shop" className="transition-colors hover:text-paper">All Products</Link></li>
-            <li><Link href="/shop?category=Clothing" className="transition-colors hover:text-paper">Clothing</Link></li>
-            <li><Link href="/shop?category=Shoes" className="transition-colors hover:text-paper">Shoes</Link></li>
-            <li><Link href="/shop?collection=featured" className="transition-colors hover:text-paper">Collections</Link></li>
+            <li><Link href="/shop" className="transition-colors hover:text-paper">Everything in the store</Link></li>
+            <li><Link href="/shop?category=Uniforms" className="transition-colors hover:text-paper">Uniforms</Link></li>
+            <li><Link href="/shop?category=Badges" className="transition-colors hover:text-paper">Badges</Link></li>
+            <li><Link href="/tickets" className="transition-colors hover:text-paper">Event Tickets</Link></li>
           </ul>
         </div>
 
