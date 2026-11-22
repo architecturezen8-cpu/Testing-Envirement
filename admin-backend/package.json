@@ -1,0 +1,29 @@
+{
+  "name": "stv-matale-admin-backend",
+  "version": "1.0.0",
+  "description": "Standalone admin backend service for the St. Thomas' College Matale store",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "start:built": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "0.45.2",
+    "express": "^4.21.2",
+    "jose": "^6.2.18",
+    "pg": "8.20.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/pg": "8.18.0",
+    "@types/node": "22.19.15",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3"
+  }
+}
