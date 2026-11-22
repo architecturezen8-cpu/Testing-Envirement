@@ -495,7 +495,7 @@ const TICKETS: Ticket[] = [
   },
 ];
 
-const TICKET_SIZES = ["1 Ticket", "2 Tickets", "3 Tickets", "4 Tickets", "Family Pass"];
+const TICKET_SIZES = ["1 Ticket", "2 Tickets", "3 Tickets", "4 Tickets", "Family Pass", "Custom"];
 
 /* ------------------------------------------------------------------ */
 /*  Seed                                                               */
@@ -607,7 +607,7 @@ async function seed() {
           productId: p.id,
           size: sz,
           color: "—",
-          stock: p.category === "Event Tickets" ? 200 : 25,
+          stock: p.category === "Event Tickets" ? 500 : 25,
         });
         variantCount += 1;
       }

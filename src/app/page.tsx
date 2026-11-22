@@ -87,8 +87,8 @@ export default async function HomePage() {
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
                 <div className="relative z-10 p-7 text-paper">
-                  <p className="text-[10px] uppercase tracking-luxe text-paper/50">
-                    "College store"
+                  <p className="text-[10px] uppercase tracking-luxe text-paper/60">
+                    College store
                   </p>
                   <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">
                     {collection.name}
@@ -109,34 +109,60 @@ export default async function HomePage() {
         </StaggerContainer>
       </section>
 
+      {/* ===== SHOP BY CATEGORY ===== */}
+      <section className="mx-auto max-w-[1400px] px-6 pb-4 lg:px-10">
+        {/* The three things students look for first */}
 
-        {/* Quick category tiles — the three things students look for first */}
-        <StaggerContainer className="mt-12 grid gap-4 sm:grid-cols-3">
+        <StaggerContainer className="mt-12 grid gap-5 sm:grid-cols-3">
           {[
-            { label: "Badges", href: "/shop?category=Badges", colour: "#7a5a1a", note: "House & college crests" },
-            { label: "Uniforms & Wear", href: "/shop?category=Uniforms", colour: "#1e3a6e", note: "Shirts, ties & knitwear" },
-            { label: "Batch Shirts", href: "/shop?category=Batch%20Shirts", colour: "#5f2229", note: "Signed batch tees" },
+            {
+              label: "Badges",
+              href: "/shop?category=Badges",
+              note: "House & college crests",
+              image: "https://images.pexels.com/photos/8066708/pexels-photo-8066708.png?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
+            },
+            {
+              label: "Uniforms & Wear",
+              href: "/shop?category=Uniforms",
+              note: "Shirts, ties & knitwear",
+              image: "https://images.pexels.com/photos/32148986/pexels-photo-32148986.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
+            },
+            {
+              label: "Batch Shirts",
+              href: "/shop?category=Batch%20Shirts",
+              note: "Signed batch tees",
+              image: "https://images.pexels.com/photos/29275615/pexels-photo-29275615.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
+            },
           ].map((c) => (
             <StaggerItem key={c.label} className="h-full">
               <Link
                 href={c.href}
-                className="group flex h-full items-center gap-4 rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel p-6 transition-shadow duration-700 hover:shadow-navy-hover"
+                className="group relative flex h-full min-h-[300px] flex-col justify-end overflow-hidden rounded-2xl bg-surface-navy ring-1 ring-inset ring-panel transition-shadow duration-700 hover:shadow-navy-hover"
               >
-                <span
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
-                  style={{ backgroundColor: c.colour }}
-                >
-                  <span className="h-3 w-3 rounded-full bg-white/90" />
-                </span>
-                <span className="flex flex-col">
-                  <span className="font-serif text-xl text-ink">{c.label}</span>
-                  <span className="mt-0.5 text-[13px] text-stone-500">{c.note}</span>
-                </span>
-                <span className="ml-auto text-accent transition-transform duration-500 group-hover:translate-x-1">→</span>
+                <Image
+                  src={c.image}
+                  alt={c.label}
+                  fill
+                  className="object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/88 via-ink/35 to-ink/10" />
+                <div className="relative z-10 p-7 text-paper">
+                  <p className="text-[10px] uppercase tracking-luxe text-paper/60">
+                    College store
+                  </p>
+                  <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">{c.label}</h3>
+                  <p className="mt-1.5 text-sm text-paper/70">{c.note}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-wide-2 text-paper/90 transition-all duration-500 group-hover:gap-4">
+                    Shop now
+                    <span>→</span>
+                  </span>
+                </div>
               </Link>
             </StaggerItem>
           ))}
         </StaggerContainer>
+      </section>
 
       {/* ===== FEATURED PRODUCTS (equal-height cards) ===== */}
       <section className="bg-cream">

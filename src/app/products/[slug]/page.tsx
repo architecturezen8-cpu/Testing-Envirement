@@ -40,6 +40,8 @@ function ProductPageInner() {
   const [adding, setAdding] = useState(false);
   // Event tickets: how many people a Family Pass covers (not every family is the same size)
   const [familySize, setFamilySize] = useState(4);
+  // Event tickets: buyer picks any number with the "Custom" tier
+  const [customQty, setCustomQty] = useState(5);
 
   useEffect(() => {
     setLoading(true);
@@ -124,9 +126,10 @@ function ProductPageInner() {
   const ticketQty = useMemo(() => {
     if (!selectedSize) return 1;
     if (selectedSize.toLowerCase().startsWith("family")) return familySize;
+    if (selectedSize.toLowerCase() === "custom") return customQty;
     const n = Number.parseInt(selectedSize.replace(/[^0-9]/g, ""), 10);
     return Number.isFinite(n) && n > 0 ? n : 1;
-  }, [selectedSize, familySize]);
+  }, [selectedSize, familySize, customQty]);
 
   const unitPrice = product?.price ?? 0;
   const ticketTotal = unitPrice * ticketQty;
@@ -149,7 +152,9 @@ function ProductPageInner() {
     const label = isTicket
       ? selectedSize.toLowerCase().startsWith("family")
         ? `Family Pass (${familySize} people)`
-        : selectedSize
+        : selectedSize.toLowerCase() === "custom"
+          ? `${customQty} tickets`
+          : selectedSize
       : selectedSize;
 
     setAdding(true);
@@ -404,6 +409,48 @@ function ProductPageInner() {
                         {n}
                       </button>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Custom amount — any number of tickets */}
+              {isTicket && selectedSize.toLowerCase() === "custom" && (
+                <div className="mt-6 rounded-xl border border-accent/30 bg-accent/5 p-5">
+                  <p className="text-[11px] uppercase tracking-wide-2 text-ink">
+                    How many tickets?
+                  </p>
+                  <p className="mt-1 text-xs text-stone-500">
+                    Enter any number — the total updates as you type.
+                  </p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <button
+                      onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-ink/40"
+                      aria-label="Fewer tickets"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={customQty}
+                      onChange={(e) => {
+                        const n = Number.parseInt(e.target.value, 10);
+                        setCustomQty(Number.isFinite(n) && n > 0 ? Math.min(50, n) : 1);
+                      }}
+                      className="w-24 rounded-lg border border-ink/15 bg-paper px-4 py-2.5 text-center text-base font-medium tabular-nums text-ink outline-none focus:border-ink/40"
+                    />
+                    <button
+                      onClick={() => setCustomQty((q) => Math.min(50, q + 1))}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-ink/40"
+                      aria-label="More tickets"
+                    >
+                      +
+                    </button>
+                    <span className="text-sm text-stone-500">
+                      {customQty === 1 ? "ticket" : "tickets"}
+                    </span>
                   </div>
                 </div>
               )}

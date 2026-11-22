@@ -6,7 +6,8 @@ import { collections, products } from "@/db/schema";
 import { and, eq, desc } from "drizzle-orm";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 import { formatPrice } from "@/lib/utils";
-import { CalendarDays, MapPin, ArrowRight } from "lucide-react";
+import { TicketCard } from "@/components/product/ticket-card";
+import { ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -106,49 +107,29 @@ export default async function TicketsPage() {
                 href={`/products/${t.slug}`}
                 className="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel transition-shadow duration-700 hover:shadow-navy-hover"
               >
-                <div className="relative aspect-[16/11] overflow-hidden">
-                  <Image
-                    src={t.images[0] ?? "/images/school-1.jpg"}
-                    alt={t.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                {t.badge && (
+                  <span className="absolute right-5 top-4 z-10 rounded-full bg-cta-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wide-2 text-accent-ink">
+                    {t.badge}
+                  </span>
+                )}
+
+                {/* Drawn ticket — no photography */}
+                <div className="px-5 pt-7 sm:px-6">
+                  <TicketCard
+                    eventTitle={t.name}
+                    date={t.description.split("Event: ")[1]?.split("\n")[0] ?? "Date to be announced"}
+                    venue={t.description.split("Venue: ")[1]?.split("\n")[0] ?? "College grounds"}
+                    tier={t.description.split("Tier: ")[1]?.split("\n")[0] ?? "General"}
+                    price={formatPrice(t.price)}
                   />
-                  {t.badge && (
-                    <span className="absolute left-4 top-4 rounded-full bg-cta-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wide-2 text-accent-ink">
-                      {t.badge}
-                    </span>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
                 </div>
 
                 <div className="flex flex-1 flex-col p-6">
-                  <h3 className="font-serif text-xl leading-snug text-ink">{t.name}</h3>
-
-                  <div className="mt-4 space-y-2 text-[13px] text-stone-500">
-                    <p className="flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 shrink-0 text-accent" />
-                      <span>{t.description.split("Event: ")[1]?.split("\n")[0] ?? "Date to be announced"}</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 shrink-0 text-accent" />
-                      <span>{t.description.split("Venue: ")[1]?.split("\n")[0] ?? "College grounds"}</span>
-                    </p>
-                  </div>
-
-                  <div className="mt-auto flex items-end justify-between gap-3 pt-6">
-                    <div>
+                  <div className="mt-auto flex items-end justify-between gap-3">
+                    <div className="flex-1">
                       <p className="text-[10px] uppercase tracking-wide-2 text-stone-500">
-                        {t.description.split("Tier: ")[1]?.split("\n")[0] ?? "General"}
+                        Tap to choose your tickets
                       </p>
-                      <p className="mt-1 text-lg font-semibold tabular-nums text-ink">
-                        {formatPrice(t.price)}
-                      </p>
-                      {t.compareAtPrice && t.compareAtPrice > t.price && (
-                        <p className="text-xs tabular-nums text-stone-400 line-through">
-                          {formatPrice(t.compareAtPrice)}
-                        </p>
-                      )}
                     </div>
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cta-accent text-accent-ink transition-transform duration-500 group-hover:translate-x-0.5">
                       <ArrowRight className="h-5 w-5" />
