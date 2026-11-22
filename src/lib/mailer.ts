@@ -24,10 +24,14 @@ function transport() {
   const pass = process.env.SMTP_PASS;
   if (!user || !pass) return null;
 
+  const port = Number(process.env.SMTP_PORT || 465);
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: Number(process.env.SMTP_PORT || 465) === 465,
+    port,
+    // 465 = implicit TLS, 587 = STARTTLS. nodemailer picks the right one from
+    // this flag, so the same code works with Gmail, Resend, Brevo or SendGrid.
+    secure: port === 465,
     auth: { user, pass },
   });
 }
