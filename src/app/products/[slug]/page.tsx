@@ -13,6 +13,7 @@ import { ReviewForm } from "@/components/product/review-form";
 import { FavoriteButton } from "@/components/product/favorite-button";
 import { ShareButton } from "@/components/product/share-button";
 import { ImageZoom } from "@/components/product/image-zoom";
+import { TicketCard } from "@/components/product/ticket-card";
 import { useRecentlyViewed } from "@/components/product/recently-viewed-context";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 import { formatPrice } from "@/lib/utils";
@@ -213,39 +214,58 @@ function ProductPageInner() {
 
       <section className="mx-auto max-w-[1400px] px-6 pb-24 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Gallery */}
+          {/* Visual — tickets show a drawn ticket, everything else a gallery */}
           <AnimatedSection>
-            <div className="space-y-4">
-              <ImageZoom
-                src={product.images[selectedImage] ?? "/images/hero.jpg"}
-                alt={product.name}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-              {product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-3">
-                  {product.images.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ${
-                        selectedImage === idx
-                          ? "ring-2 ring-ink"
-                          : "ring-1 ring-ink/15 hover:ring-ink/40"
-                      }`}
-                    >
-                      <Image
-                        src={img}
-                        alt={`${product.name} view ${idx + 1}`}
-                        fill
-                        sizes="120px"
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {isTicket ? (
+              <div className="sticky top-24 space-y-6">
+                <TicketCard
+                  eventTitle={product.name}
+                  date={product.description.split("Event: ")[1]?.split("\n")[0] ?? "Date to be announced"}
+                  venue={product.description.split("Venue: ")[1]?.split("\n")[0] ?? "College grounds"}
+                  tier={selectedSize.startsWith("Family")
+                    ? `Family · ${familySize}`
+                    : selectedSize === "Custom"
+                      ? `${customQty} tickets`
+                      : selectedSize}
+                  price={formatPrice(ticketTotal)}
+                />
+                <p className="text-center text-xs text-stone-500">
+                  Show this reference at the gate — no printed ticket needed.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <ImageZoom
+                  src={product.images[selectedImage] ?? "/images/hero.jpg"}
+                  alt={product.name}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+                {product.images.length > 1 && (
+                  <div className="grid grid-cols-4 gap-3">
+                    {product.images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedImage(idx)}
+                        className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ${
+                          selectedImage === idx
+                            ? "ring-2 ring-ink"
+                            : "ring-1 ring-ink/15 hover:ring-ink/40"
+                        }`}
+                      >
+                        <Image
+                          src={img}
+                          alt={`${product.name} view ${idx + 1}`}
+                          fill
+                          sizes="120px"
+                          className="object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </AnimatedSection>
 
           {/* Info */}
