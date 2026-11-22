@@ -131,14 +131,15 @@ const COLLECTIONS = [
   { name: "Event Tickets", slug: "event-tickets", description: "Big Match, sports meets, prize days and college events.", featured: true, sortOrder: 5 },
 ];
 
+// The six groups the college actually sells under. These drive the shop
+// filters, so keep the names short and recognisable.
 const CATEGORIES = [
-  { name: "Uniforms", slug: "uniforms", sortOrder: 1 },
+  { name: "Event Tickets", slug: "event-tickets", sortOrder: 1 },
   { name: "Badges", slug: "badges", sortOrder: 2 },
-  { name: "Bags", slug: "bags", sortOrder: 3 },
-  { name: "Caps", slug: "caps", sortOrder: 4 },
-  { name: "Ties", slug: "ties", sortOrder: 5 },
-  { name: "Stationery", slug: "stationery", sortOrder: 6 },
-  { name: "Event Tickets", slug: "event-tickets", sortOrder: 7 },
+  { name: "Uniforms", slug: "uniforms", sortOrder: 3 },
+  { name: "Event Clothes", slug: "event-clothes", sortOrder: 4 },
+  { name: "Exam Writing Papers", slug: "exam-writing-papers", sortOrder: 5 },
+  { name: "Batch Shirts", slug: "batch-shirts", sortOrder: 6 },
 ];
 
 const ITEMS: Item[] = [
@@ -291,7 +292,7 @@ const ITEMS: Item[] = [
     slug: "college-school-bag",
     price: 6500,
     compareAt: 7500,
-    category: "Bags",
+    category: "Event Clothes",
     gender: "Unisex",
     description:
       "Reinforced nylon school bag with the crest embroidered on the front, a padded laptop sleeve and a water bottle pocket.",
@@ -304,7 +305,7 @@ const ITEMS: Item[] = [
     name: "College Cap",
     slug: "college-cap",
     price: 1500,
-    category: "Caps",
+    category: "Event Clothes",
     gender: "Unisex",
     description:
       "Adjustable navy baseball cap with the crest embroidered on the front. Worn at sports meets and on tours.",
@@ -318,7 +319,7 @@ const ITEMS: Item[] = [
     name: "College Tie",
     slug: "college-tie",
     price: 1800,
-    category: "Ties",
+    category: "Uniforms",
     gender: "Boys",
     description:
       "Striped college tie in the official colours. Worn with the white shirt on formal days and at college functions.",
@@ -330,7 +331,7 @@ const ITEMS: Item[] = [
     name: "Prefect Tie",
     slug: "prefect-tie",
     price: 2200,
-    category: "Ties",
+    category: "Uniforms",
     gender: "Boys",
     description:
       "The prefect tie — heavier weave with the gold prefect crest. Issued to senior and junior prefects.",
@@ -340,12 +341,78 @@ const ITEMS: Item[] = [
     collection: "uniforms",
   },
 
-  /* ---------- Stationery ---------- */
+  {
+    name: "Batch Shirt — 2026 A/L",
+    slug: "batch-shirt-2026-al",
+    price: 2900,
+    category: "Batch Shirts",
+    gender: "Unisex",
+    description:
+      "The signed batch shirt for the 2026 Advanced Level batch, printed with every classmate's name on the back. Order yours before the batch photo day.",
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [NAVY, WHITE, BLACK],
+    badge: "Batch only",
+    collection: "uniforms",
+  },
+  {
+    name: "Batch Shirt — 2026 O/L",
+    slug: "batch-shirt-2026-ol",
+    price: 2700,
+    category: "Batch Shirts",
+    gender: "Unisex",
+    description:
+      "Commemorative shirt for the 2026 Ordinary Level batch — college crest on the chest, batch year printed across the back.",
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [NAVY, WHITE],
+    badge: "Batch only",
+    collection: "uniforms",
+  },
+  {
+    name: "Old Boys' Association Shirt",
+    slug: "old-boys-association-shirt",
+    price: 3400,
+    category: "Batch Shirts",
+    gender: "Unisex",
+    description:
+      "Smart cotton shirt for OBA members, with the college crest embroidered on the pocket and the membership year on the sleeve.",
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [NAVY, WHITE],
+    collection: "uniforms",
+  },
+
+  /* ---------- Exam writing papers ---------- */
+  {
+    name: "Exam Writing Paper Pack — 50 Sheets",
+    slug: "exam-writing-paper-pack-50",
+    price: 600,
+    category: "Exam Writing Papers",
+    gender: "Unisex",
+    description:
+      "Fifty sheets of the college-approved exam writing paper, ruled to the standard format used in every term test. One pack covers a full term.",
+    sizes: ["Pack of 50"],
+    colors: [],
+    collection: "stationery",
+  },
+  {
+    name: "Exam Writing Paper Pack — 100 Sheets",
+    slug: "exam-writing-paper-pack-100",
+    price: 1050,
+    compareAt: 1200,
+    category: "Exam Writing Papers",
+    gender: "Unisex",
+    description:
+      "The hundred-sheet pack — better value for a year of term tests and revisions, same college-approved ruling.",
+    sizes: ["Pack of 100"],
+    colors: [],
+    collection: "stationery",
+  },
+
+  /* ---------- Event clothes extras ---------- */
   {
     name: "School Face Mask",
     slug: "school-face-mask",
     price: 350,
-    category: "Stationery",
+    category: "Event Clothes",
     gender: "Unisex",
     description:
       "Reusable cloth mask with the college crest, washable and sized for juniors and seniors.",
@@ -353,18 +420,7 @@ const ITEMS: Item[] = [
     colors: [NAVY, WHITE],
     collection: "stationery",
   },
-  {
-    name: "Exam Writing Paper Pack",
-    slug: "exam-writing-paper-pack",
-    price: 600,
-    category: "Stationery",
-    gender: "Unisex",
-    description:
-      "Pack of 50 sheets of the college-approved exam writing paper, ruled to the standard format used in all term tests.",
-    sizes: ["Pack of 50"],
-    colors: [WHITE],
-    collection: "stationery",
-  },
+
 ];
 
 /* ------------------------------------------------------------------ */

@@ -6,7 +6,6 @@ import { desc, eq, sql } from "drizzle-orm";
 import { ProductCard } from "@/components/product/product-card";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section";
 import { HeroCarousel } from "@/components/home/hero-carousel";
-import { SchoolCrest } from "@/components/layout/school-crest";
 
 export const dynamic = "force-dynamic";
 
@@ -55,54 +54,6 @@ export default async function HomePage() {
     <>
       {/* ===== HERO — cinematic college imagery ===== */}
       <HeroCarousel />
-
-      {/* ===== SHOP BY HOUSE ===== */}
-      <section className="mx-auto max-w-[1400px] px-6 pb-4 pt-20 lg:px-10 lg:pt-28">
-        <AnimatedSection>
-          <div className="mb-10 text-center">
-            <p className="text-[11px] uppercase tracking-luxe text-accent">Inter-house</p>
-            <h2 className="mt-4 font-serif text-[clamp(2rem,4vw,3.25rem)] font-light leading-tight text-ink">
-              Shop your house
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-stone-500">
-              Austin, Bede, Pius and Clement — pick up your house badge and wear
-              your colours at the next inter-house meet.
-            </p>
-          </div>
-        </AnimatedSection>
-
-        <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { house: "Austin", colour: "#1e3a6e", motto: "Fortiter et Fideliter" },
-            { house: "Bede", colour: "#5f2229", motto: "Scientia et Sapientia" },
-            { house: "Pius", colour: "#1f5136", motto: "Pietas et Veritas" },
-            { house: "Clement", colour: "#7a5a1a", motto: "Constantia et Labore" },
-          ].map((h) => (
-            <StaggerItem key={h.house} className="h-full">
-              <Link
-                href={`/shop?q=${encodeURIComponent(`${h.house} House`)}`}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel transition-shadow duration-700 hover:shadow-navy-hover"
-              >
-                <div className="flex h-24 items-center justify-center" style={{ backgroundColor: h.colour }}>
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 ring-1 ring-black/10">
-                    <SchoolCrest className="h-9 w-9 text-navy" />
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="font-serif text-2xl text-ink">{h.house} House</h3>
-                  <p className="mt-1.5 flex-1 text-sm italic leading-relaxed text-stone-500">
-                    {h.motto}
-                  </p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-wide-2 text-accent transition-all duration-500 group-hover:gap-3.5">
-                    Shop {h.house}
-                    <span>→</span>
-                  </span>
-                </div>
-              </Link>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-      </section>
 
       {/* ===== FEATURED COLLECTIONS (Editorial) ===== */}
       <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-10 lg:py-32">
@@ -157,6 +108,35 @@ export default async function HomePage() {
           ))}
         </StaggerContainer>
       </section>
+
+
+        {/* Quick category tiles — the three things students look for first */}
+        <StaggerContainer className="mt-12 grid gap-4 sm:grid-cols-3">
+          {[
+            { label: "Badges", href: "/shop?category=Badges", colour: "#7a5a1a", note: "House & college crests" },
+            { label: "Uniforms & Wear", href: "/shop?category=Uniforms", colour: "#1e3a6e", note: "Shirts, ties & knitwear" },
+            { label: "Batch Shirts", href: "/shop?category=Batch%20Shirts", colour: "#5f2229", note: "Signed batch tees" },
+          ].map((c) => (
+            <StaggerItem key={c.label} className="h-full">
+              <Link
+                href={c.href}
+                className="group flex h-full items-center gap-4 rounded-2xl bg-surface-navy bg-sheen-light ring-1 ring-inset ring-panel p-6 transition-shadow duration-700 hover:shadow-navy-hover"
+              >
+                <span
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor: c.colour }}
+                >
+                  <span className="h-3 w-3 rounded-full bg-white/90" />
+                </span>
+                <span className="flex flex-col">
+                  <span className="font-serif text-xl text-ink">{c.label}</span>
+                  <span className="mt-0.5 text-[13px] text-stone-500">{c.note}</span>
+                </span>
+                <span className="ml-auto text-accent transition-transform duration-500 group-hover:translate-x-1">→</span>
+              </Link>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
 
       {/* ===== FEATURED PRODUCTS (equal-height cards) ===== */}
       <section className="bg-cream">

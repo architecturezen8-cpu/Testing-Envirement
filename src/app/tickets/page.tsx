@@ -49,6 +49,7 @@ export default async function TicketsPage() {
         {/* Scrims blend into the charcoal canvas — no white haze */}
         <div className="absolute inset-0 bg-radial-navy" />
         <div className="absolute inset-0 bg-hero-vignette" />
+        <div className="absolute inset-0 bg-[radial-gradient(52rem_22rem_at_50%_62%,rgba(4,7,14,0.72)_0%,rgba(5,9,17,0.42)_45%,transparent_78%)]" />
         <div className="absolute inset-x-0 top-0 h-[34%] bg-gradient-to-b from-base via-base/50 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-base via-base/70 to-transparent" />
 
@@ -71,14 +72,14 @@ export default async function TicketsPage() {
 
           <div className="mt-7 h-px w-24 bg-gradient-to-r from-transparent via-paper/35 to-transparent" />
 
-          <p className="mt-7 max-w-xl text-sm leading-relaxed text-paper/75 sm:text-base">
+          <p className="mt-7 max-w-xl text-[15px] font-medium leading-relaxed text-paper text-luxe-shadow sm:text-lg">
             The Big Match, the inter-house sports meet, prize day and the carols
             evening — book your place at the events that make the college year.
           </p>
 
           <Link
             href="#tickets"
-            className="group mt-8 inline-flex items-center gap-2.5 rounded-full bg-cta-accent px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover"
+            className="group mt-9 inline-flex items-center gap-2.5 rounded-full bg-cta-accent px-8 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-accent-ink shadow-cta transition-all duration-500 hover:bg-cta-accent-hover hover:shadow-cta-hover"
           >
             See what&apos;s on
             <span className="transition-transform duration-500 group-hover:translate-y-0.5">↓</span>

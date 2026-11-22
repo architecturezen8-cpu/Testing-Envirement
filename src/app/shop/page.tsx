@@ -113,97 +113,76 @@ function ShopPageInner() {
   ].filter(Boolean) as { key: string; label: string }[];
 
   const FilterPanel = () => (
-    <div className="space-y-8">
+    <div className="space-y-7">
+      {/* --- Category --- */}
       <div>
-        <h3 className="text-[11px] font-medium uppercase tracking-wide-2 text-ink">
-          Collection
-        </h3>
-        <div className="mt-3 space-y-2">
-          {collections.map((c) => (
-            <label
-              key={c.id}
-              className="flex cursor-pointer items-center gap-3 text-sm text-ink/70 transition-colors hover:text-ink"
-            >
-              <input
-                type="radio"
-                name="collection"
-                checked={filters.collection === c.slug}
-                onChange={() => updateFilter("collection", c.slug)}
-                className="h-4 w-4 accent-bronze"
-              />
-              {c.name}
-            </label>
-          ))}
-          <label className="flex cursor-pointer items-center gap-3 text-sm text-ink/70 transition-colors hover:text-ink">
-            <input
-              type="radio"
-              name="collection"
-              checked={filters.collection === "featured"}
-              onChange={() => updateFilter("collection", "featured")}
-              className="h-4 w-4 accent-bronze"
-            />
-            Featured
-          </label>
-          <button
-            onClick={() => updateFilter("collection", "")}
-            className="text-xs text-bronze underline-offset-2 hover:underline"
-          >
-            Clear collection
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-[11px] font-medium uppercase tracking-wide-2 text-ink">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide-2 text-ink">
           Category
         </h3>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {categories.map((c: string) => (
-            <button
-              key={c}
-              onClick={() =>
-                updateFilter("category", filters.category === c ? "" : c)
-              }
-              className={`rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
-                filters.category === c
-                  ? "border-ink bg-ink text-paper"
-                  : "border-ink/15 text-ink/70 hover:border-ink/40"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
+        <div className="mt-3 space-y-1.5">
+          {categories.map((c: string) => {
+            const active = filters.category === c;
+            return (
+              <button
+                key={c}
+                onClick={() => updateFilter("category", active ? "" : c)}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${
+                  active
+                    ? "bg-ink/8 font-medium text-ink"
+                    : "text-ink/70 hover:bg-ink/5 hover:text-ink"
+                }`}
+              >
+                <span>{c}</span>
+                {active && <X className="h-3.5 w-3.5 text-stone-400" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      <div className="h-px bg-ink/8" />
+
+      {/* --- Who it is for --- */}
       <div>
-        <h3 className="text-[11px] font-medium uppercase tracking-wide-2 text-ink">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide-2 text-ink">
           Who&apos;s it for
         </h3>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {genders.map((g) => (
-            <button
-              key={g === "Boys" ? "Boys' uniform" : g === "Girls" ? "Girls' uniform" : "All students"}
-              onClick={() =>
-                updateFilter("gender", filters.gender === g ? "" : g)
-              }
-              className={`rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
-                filters.gender === g
-                  ? "border-ink bg-ink text-paper"
-                  : "border-ink/15 text-ink/70 hover:border-ink/40"
-              }`}
-            >
-              {g === "Boys" ? "Boys\u2019 uniform" : g === "Girls" ? "Girls\u2019 uniform" : "All students"}
-            </button>
-          ))}
+        <div className="mt-3 space-y-1.5">
+          {genders.map((g: string) => {
+            const active = filters.gender === g;
+            const label =
+              g === "Boys"
+                ? "Boys’ uniform"
+                : g === "Girls"
+                  ? "Girls’ uniform"
+                  : "All students";
+            return (
+              <label
+                key={g}
+                className="flex cursor-pointer items-center gap-3 text-sm text-ink/70 transition-colors hover:text-ink"
+              >
+                <input
+                  type="radio"
+                  name="who"
+                  checked={active}
+                  onChange={() => updateFilter("gender", active ? "" : g)}
+                  className="h-4 w-4 accent-stone-950"
+                />
+                {label}
+              </label>
+            );
+          })}
         </div>
       </div>
 
+      <div className="h-px bg-ink/8" />
+
+      {/* --- Price --- */}
       <div>
-        <h3 className="text-[11px] font-medium uppercase tracking-wide-2 text-ink">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide-2 text-ink">
           Price
         </h3>
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 space-y-1.5">
           {priceRanges.map((range) => {
             const active =
               filters.minPrice === String(range.min) &&
@@ -217,14 +196,48 @@ function ShopPageInner() {
                     : (updateFilter("minPrice", String(range.min)),
                       updateFilter("maxPrice", String(range.max)))
                 }
-                className={`block w-full text-left text-sm transition-colors ${
-                  active ? "font-medium text-ink" : "text-ink/60 hover:text-ink"
+                className={`block w-full rounded-lg px-3 py-1.5 text-left text-sm transition-colors ${
+                  active
+                    ? "bg-ink/8 font-medium text-ink"
+                    : "text-ink/60 hover:bg-ink/5 hover:text-ink"
                 }`}
               >
                 {range.label}
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="h-px bg-ink/8" />
+
+      {/* --- Group --- */}
+      <div>
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide-2 text-ink">
+          Group
+        </h3>
+        <div className="mt-3 space-y-1.5">
+          {collections.map((c) => (
+            <label
+              key={c.id}
+              className="flex cursor-pointer items-center gap-3 text-sm text-ink/70 transition-colors hover:text-ink"
+            >
+              <input
+                type="radio"
+                name="collection"
+                checked={filters.collection === c.slug}
+                onChange={() => updateFilter("collection", c.slug)}
+                className="h-4 w-4 accent-stone-950"
+              />
+              {c.name}
+            </label>
+          ))}
+          <button
+            onClick={() => updateFilter("collection", "")}
+            className="mt-1 text-xs text-bronze underline-offset-2 hover:underline"
+          >
+            Clear group
+          </button>
         </div>
       </div>
     </div>

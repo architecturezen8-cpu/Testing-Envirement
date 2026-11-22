@@ -457,8 +457,43 @@ function ProductPageInner() {
                 </p>
               </div>
 
-              {/* Quantity & Add */}
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              {/* Ticket purchase summary */}
+              {isTicket && (
+                <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/5 p-5">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-[11px] uppercase tracking-wide-2 text-ink">
+                      Order summary
+                    </span>
+                    <span className="text-[11px] uppercase tracking-wide-2 text-stone-500">
+                      {selectedSize.startsWith("Family")
+                        ? `Family Pass · ${familySize} people`
+                        : selectedSize}
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-1.5 text-sm text-stone-600">
+                    <div className="flex justify-between">
+                      <span>
+                        {formatPrice(unitPrice)} × {ticketQty} {ticketQty === 1 ? "ticket" : "tickets"}
+                      </span>
+                      <span className="tabular-nums">{formatPrice(ticketTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Gate collection</span>
+                      <span className="text-green-700">Free</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex justify-between border-t border-ink/10 pt-3">
+                    <span className="font-medium text-ink">Total to pay</span>
+                    <span className="font-semibold tabular-nums text-ink">
+                      {formatPrice(ticketTotal)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity & Add — tickets skip the stepper, the tier is the quantity */}
+              <div className={`mt-8 flex flex-col gap-3 sm:flex-row ${isTicket ? "sm:flex-row-reverse" : ""}`}>
+                {!isTicket && (
                 <div
                   className={`flex items-center justify-between rounded-full border border-ink/15 px-2 py-2 ${
                     !variantAvailable ? "pointer-events-none opacity-40" : ""
@@ -484,13 +519,20 @@ function ProductPageInner() {
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
+                )}
                 {variantAvailable ? (
                   <button
                     onClick={handleAddToCart}
                     disabled={adding}
                     className="flex-1 rounded-full bg-cta-accent py-4 text-xs font-semibold uppercase tracking-wide-2 text-accent-ink transition-all duration-500 hover:bg-cta-accent-hover disabled:opacity-70"
                   >
-                    {adding ? "Added ✓" : "Add to bag"}
+                    {adding
+                      ? isTicket
+                        ? "Added ✓"
+                        : "Added ✓"
+                      : isTicket
+                        ? "Buy tickets"
+                        : "Add to bag"}
                   </button>
                 ) : (
                   <button
@@ -515,7 +557,7 @@ function ProductPageInner() {
               </div>
 
               {/* Trust badges */}
-              <div className="mt-10 grid grid-cols-3 gap-3 border-t border-ink/10 pt-8 text-center">
+              <div className={`mt-10 grid grid-cols-3 gap-3 border-t border-ink/10 pt-8 text-center ${isTicket ? "hidden" : ""}`}>
                 <div className="flex flex-col items-center gap-1.5">
                   <Truck className="h-5 w-5 text-bronze" />
                   <span className="text-[11px] uppercase tracking-wide-2 text-stone-500">Global shipping</span>
