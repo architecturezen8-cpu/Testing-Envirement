@@ -202,12 +202,12 @@ function ProductPageInner() {
 
   return (
     <>
-      <div className="mx-auto max-w-[1400px] px-6 pt-6 lg:px-10">
-        <nav className="text-[11px] uppercase tracking-wide-2 text-stone-500">
-          <Link href="/" className="hover:text-ink">Home</Link>
-          <span className="mx-2">/</span>
-          <Link href="/shop" className="hover:text-ink">Shop</Link>
-          <span className="mx-2">/</span>
+      <div className="relative z-20 mx-auto max-w-[1400px] px-6 pb-6 pt-8 lg:px-10">
+        <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-wide-2 text-stone-500">
+          <Link href="/" className="transition-colors hover:text-ink">Home</Link>
+          <span className="text-stone-600">/</span>
+          <Link href="/shop" className="transition-colors hover:text-ink">Shop</Link>
+          <span className="text-stone-600">/</span>
           <span className="text-ink">{product.name}</span>
         </nav>
       </div>
@@ -217,7 +217,7 @@ function ProductPageInner() {
           {/* Visual — tickets show a drawn ticket, everything else a gallery */}
           <AnimatedSection>
             {isTicket ? (
-              <div className="sticky top-24 space-y-6">
+              <div className="space-y-6">
                 <TicketCard
                   eventTitle={product.name}
                   date={product.description.split("Event: ")[1]?.split("\n")[0] ?? "Date to be announced"}
@@ -758,8 +758,8 @@ function ProductPageInner() {
           </AnimatedSection>
           <StaggerContainer className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((p) => (
-              <StaggerItem key={p.id}>
-                <ProductCard product={p} />
+              <StaggerItem key={p.id} className="h-full">
+                <ProductCard product={p} className="h-full" />
               </StaggerItem>
             ))}
           </StaggerContainer>

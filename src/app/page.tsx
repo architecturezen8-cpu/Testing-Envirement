@@ -60,24 +60,26 @@ export default async function HomePage() {
         <StaggerContainer className="grid gap-5 sm:grid-cols-3">
           {[
             {
-              label: "Badges",
+              label: "Badges & Crests",
               href: "/shop?category=Badges",
-              note: "House & college crests",
-              image: "https://images.pexels.com/photos/8066708/pexels-photo-8066708.png?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
+              note: "Austin, Bede, Pius and Clement",
+              image:
+                "https://images.pexels.com/photos/31350073/pexels-photo-31350073.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
             },
             {
-              label: "Uniforms & Wear",
+              label: "Uniforms",
               href: "/shop?category=Uniforms",
-              note: "Shirts, ties & knitwear",
-              image: "https://images.pexels.com/photos/32148986/pexels-photo-32148986.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
+              note: "Shirts, blazers, ties & knitwear",
+              image:
+                "https://images.pexels.com/photos/32242324/pexels-photo-32242324.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
             },
             {
               label: "Batch Shirts",
               href: "/shop?category=Batch%20Shirts",
-              note: "Signed batch tees",
-              image: "https://images.pexels.com/photos/29275615/pexels-photo-29275615.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
-            },
-          ].map((c) => (
+              note: "Signed by your class",
+              image:
+                "https://images.pexels.com/photos/36859102/pexels-photo-36859102.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=900&h=1100",
+            },          ].map((c) => (
             <StaggerItem key={c.label} className="h-full">
               <Link
                 href={c.href}
@@ -92,7 +94,7 @@ export default async function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/88 via-ink/35 to-ink/10" />
                 <div className="relative z-10 p-7 text-paper">
-                  <p className="text-[10px] uppercase tracking-luxe text-paper/60">
+                  <p className="text-[10px] uppercase tracking-luxe text-accent">
                     College store
                   </p>
                   <h3 className="mt-2 font-serif text-2xl font-light lg:text-3xl">{c.label}</h3>
@@ -129,7 +131,7 @@ export default async function HomePage() {
             </div>
           </AnimatedSection>
 
-          <StaggerContainer className="grid gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          <StaggerContainer className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {featuredProducts.map((product) => (
               <StaggerItem key={product.id} className="h-full">
                 <ProductCard product={product} className="h-full" />

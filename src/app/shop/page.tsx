@@ -112,6 +112,49 @@ function ShopPageInner() {
     },
   ].filter(Boolean) as { key: string; label: string }[];
 
+  // ---- Grouped view ----
+  // With no filters applied the catalogue is laid out section by section
+  // (Uniforms, Badges, …) so the page reads like a college store rather than
+  // one long undifferentiated grid. As soon as a filter is active the results
+  // collapse into a single grid under that filter's title.
+  const isFiltered = Boolean(
+    filters.category ||
+      filters.gender ||
+      filters.collection ||
+      filters.minPrice ||
+      filters.q,
+  );
+
+  const grouped = useMemo(() => {
+    if (isFiltered) return [];
+    const order = [
+      "Uniforms",
+      "Badges",
+      "Batch Shirts",
+      "Event Clothes",
+      "Exam Writing Papers",
+      "Event Tickets",
+    ];
+    const byCat = new Map<string, Product[]>();
+    for (const prod of products) {
+      const list = byCat.get(prod.category) ?? [];
+      list.push(prod);
+      byCat.set(prod.category, list);
+    }
+    return order
+      .filter((c) => byCat.has(c))
+      .map((c) => ({ category: c, items: byCat.get(c)! }));
+  }, [products, isFiltered]);
+
+  const GROUP_NOTES: Record<string, string> = {
+    Uniforms: "Shirts, blazers, ties and knitwear for every grade",
+    Badges: "House and college crests",
+    "Batch Shirts": "Signed shirts for the leaving batch",
+    "Event Clothes": "Caps, bags and event-day extras",
+    "Exam Writing Papers": "College-approved paper for term tests",
+    "Event Tickets": "Book your place at the college events",
+  };
+
   const FilterPanel = () => (
     <div className="space-y-7">
       {/* --- Category --- */}
@@ -249,11 +292,11 @@ function ShopPageInner() {
       <div className="mx-auto max-w-[1400px] px-6 py-12 lg:px-10 lg:py-16">
         <AnimatedSection>
           <div>
-            <p className="text-xs uppercase tracking-wide-2 text-bronze">
-              Shop
+            <p className="text-xs uppercase tracking-wide-2 text-accent">
+              St. Thomas&apos; College Matale
             </p>
             <h1 className="mt-2 font-serif text-4xl font-light text-ink lg:text-5xl">
-              All Products
+              College Store
             </h1>
           </div>
         </AnimatedSection>
@@ -286,7 +329,7 @@ function ShopPageInner() {
         <section className="flex-1">
           <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <p className="text-sm text-stone-500">
-              {loading ? "Loading..." : <><span className="text-ink">{products.length}</span> {products.length === 1 ? "piece" : "pieces"}</>}
+              {loading ? "Loading..." : <><span className="text-ink">{products.length}</span> {products.length === 1 ? "item" : "items"}</>}
             </p>
             <div className="relative">
               <select
@@ -333,7 +376,7 @@ function ShopPageInner() {
           )}
 
           {loading ? (
-            <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
@@ -351,14 +394,59 @@ function ShopPageInner() {
                 Clear filters
               </button>
             </div>
+          ) : isFiltered ? (
+            // ---- Filtered: one grid, titled by the active filter ----
+            <>
+              {filters.category && (
+                <div className="mb-8">
+                  <h2 className="font-serif text-3xl font-light text-ink">
+                    {filters.category}
+                  </h2>
+                  <p className="mt-1.5 text-sm text-stone-500">
+                    {GROUP_NOTES[filters.category] ?? "College merchandise"}
+                  </p>
+                </div>
+              )}
+              <StaggerContainer className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                {products.map((product) => (
+                  <StaggerItem key={product.id}>
+                    <ProductCard product={product} onQuickView={setQuickViewProduct} />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            </>
           ) : (
-            <StaggerContainer className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
-                <StaggerItem key={product.id}>
-                  <ProductCard product={product} onQuickView={setQuickViewProduct} />
-                </StaggerItem>
+            // ---- Unfiltered: grouped section by section ----
+            <div className="space-y-16">
+              {grouped.map((group) => (
+                <div key={group.category}>
+                  <div className="mb-8 flex items-end justify-between gap-4 border-b border-ink/8 pb-4">
+                    <div>
+                      <h2 className="font-serif text-3xl font-light text-ink">
+                        {group.category}
+                      </h2>
+                      <p className="mt-1.5 text-sm text-stone-500">
+                        {GROUP_NOTES[group.category] ?? "College merchandise"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => updateFilter("category", group.category)}
+                      className="hidden shrink-0 items-center gap-2 text-xs uppercase tracking-wide-2 text-ink/70 transition-colors hover:text-ink sm:flex"
+                    >
+                      See all
+                      <span>→</span>
+                    </button>
+                  </div>
+                  <StaggerContainer className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.items.map((product) => (
+                      <StaggerItem key={product.id}>
+                        <ProductCard product={product} onQuickView={setQuickViewProduct} />
+                      </StaggerItem>
+                    ))}
+                  </StaggerContainer>
+                </div>
               ))}
-            </StaggerContainer>
+            </div>
           )}
         </section>
       </div>
