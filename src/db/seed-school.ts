@@ -9,6 +9,7 @@
  */
 import "dotenv/config";
 import { db } from "./index";
+import { sql } from "drizzle-orm";
 import { collections, categories, products, reviews, productVariants } from "./schema";
 
 /* ------------------------------------------------------------------ */
@@ -33,6 +34,11 @@ const PHOTO = {
   knitwear: "/images/merch/knitwear.jpg",
   hoodieRack: PEXELS("30095407"),
   badge: PEXELS("31350073"),        // enamelled metal badge close-up
+  badgeRows: PEXELS("33714875"),    // rows of badges on dark surface
+  badgeRed: PEXELS("5926407"),      // red enamel pin
+  badgePins: PEXELS("14420435"),    // assorted enamel pins
+  badgeButtons: PEXELS("10771820"), // button pins on black
+  badgeGold: PEXELS("4070997"),     // gold medal
   bag: `https://images.pexels.com/photos/11463459/pexels-photo-11463459.png?auto=compress&cs=tinysrgb&fit=crop&w=800&h=1200`, // navy backpack (.png only)
   cap: PEXELS("29926576"),          // navy cap
   tieStriped: PEXELS("4637863"),    // striped navy tie
@@ -42,6 +48,11 @@ const PHOTO = {
   cricketNight: PEXELS("36230651", 1200, 800), // floodlit cricket, big crowd
   cricketField: PEXELS("21415109", 1200, 800), // players walking out
   cricketAction: PEXELS("31131696", 1200, 800),
+  batchFlag: PEXELS("9566140"),        // group in matching t-shirts
+  batchGraduates: PEXELS("29275615"),  // graduates celebrating
+  batchCampus: PEXELS("29229896"),     // graduates on campus
+  batchConfetti: PEXELS("7944181"),    // graduates with confetti
+  paperNotes: PEXELS("5208770"),       // stacked notebooks
   collegeBuilding: "/images/school-1.jpg",
   students: "/images/school-2.jpg",
   merchStillLife: "/images/school-3.jpg",
@@ -50,17 +61,17 @@ const PHOTO = {
 /** Per-slug gallery — first entry is the primary image. */
 const IMAGE_MAP: Record<string, string[]> = {
   "college-polo-shirt": [PHOTO.polo, PHOTO.merchStillLife],
-  "college-sports-t-shirt": [PHOTO.polo, PHOTO.knitwear],
+  "college-sports-t-shirt": [PHOTO.students, PHOTO.batchFlag],
   "school-white-shirt": [PHOTO.whiteShirt, PHOTO.merchStillLife],
   "school-blazer": [PHOTO.blazer, PHOTO.merchStillLife],
   "college-pullover": [PHOTO.knitwear],
   "college-hoodie": [PHOTO.hoodieRack, PHOTO.knitwear],
 
-  "austin-house-badge": [PHOTO.badge],
-  "bede-house-badge": [PHOTO.badge],
-  "pius-house-badge": [PHOTO.badge],
-  "clement-house-badge": [PHOTO.badge],
-  "college-crest-badge": [PHOTO.badge, PHOTO.blazer],
+  "austin-house-badge": [PHOTO.badgeRows, PHOTO.badge],
+  "bede-house-badge": [PHOTO.badgeRed, PHOTO.badge],
+  "pius-house-badge": [PHOTO.badgePins, PHOTO.badge],
+  "clement-house-badge": [PHOTO.badgeGold, PHOTO.badge],
+  "college-crest-badge": [PHOTO.badgeButtons, PHOTO.badge],
 
   "college-school-bag": [PHOTO.bag],
   "college-cap": [PHOTO.cap, PHOTO.merchStillLife],
@@ -68,22 +79,26 @@ const IMAGE_MAP: Record<string, string[]> = {
   "college-tie": [PHOTO.tieStriped],
   "prefect-tie": [PHOTO.tiesRolled],
 
-  "school-face-mask": [PHOTO.stationerySet],
-  "exam-writing-paper-pack": [PHOTO.stationery],
+  "school-face-mask": [PHOTO.stationerySet, PHOTO.stationery],
+  "exam-writing-paper-pack-50": [PHOTO.stationery, PHOTO.paperNotes],
+  "exam-writing-paper-pack-100": [PHOTO.paperNotes, PHOTO.stationery],
+  "batch-shirt-2026-al": [PHOTO.batchFlag, PHOTO.batchGraduates],
+  "batch-shirt-2026-ol": [PHOTO.batchGraduates, PHOTO.batchConfetti],
+  "old-boys-association-shirt": [PHOTO.batchCampus, PHOTO.batchFlag],
 
   "big-match-2026": [PHOTO.cricketNight, PHOTO.cricketAction],
   "big-match-2026-pavilion": [PHOTO.cricketField, PHOTO.cricketNight],
   "annual-prize-day-2026": [PHOTO.collegeBuilding],
   "inter-house-sports-meet-2026": [PHOTO.cricketAction, PHOTO.cricketField],
-  "carols-evening-2026": [PHOTO.students, PHOTO.collegeBuilding],
+  "carols-evening-2026": [PHOTO.merchStillLife, PHOTO.collegeBuilding],
 };
 
 /** Collections take their cover photo from a representative product. */
 const COLLECTION_COVER: Record<string, string> = {
   uniforms: PHOTO.polo,
-  "house-badges": PHOTO.badge,
+  "house-badges": PHOTO.badgeRows,
   accessories: PHOTO.bag,
-  stationery: PHOTO.stationery,
+  stationery: PHOTO.paperNotes,
   "event-tickets": PHOTO.cricketNight,
 };
 
@@ -503,11 +518,17 @@ const TICKET_SIZES = ["1 Ticket", "2 Tickets", "3 Tickets", "4 Tickets", "Family
 
 async function seed() {
   console.log("Clearing existing catalogue…");
-  await db.delete(productVariants);
-  await db.delete(reviews);
-  await db.delete(products);
-  await db.delete(categories);
-  await db.delete(collections);
+
+  // TRUNCATE ... CASCADE clears every table that depends on `products`
+  // (order_items, reviews, product_variants) in one statement. Deleting row by
+  // row fails with FK error 23503 whenever a customer has already ordered
+  // something, because order_items still points at those products.
+  await db.execute(sql`
+    truncate table order_items, notifications, orders, reviews,
+                   product_variants, products, categories, collections
+    restart identity cascade
+  `);
+  console.log("  cleared (orders, order items and reviews included)");
 
   console.log("Seeding collections…");
   const inserted = await db
