@@ -272,3 +272,48 @@ export const homepageConfig = pgTable("homepage_config", {
 });
 
 export type HomepageConfig = typeof homepageConfig.$inferSelect;
+
+/* =====================================================================
+   ISSUED TICKETS — one row per ticket bought, each with a unique QR.
+   ===================================================================== */
+
+export const issuedTickets = pgTable("issued_tickets", {
+  id: serial("id").primaryKey(),
+
+  /** Human-readable reference, e.g. "SCTC-AB12CD". */
+  ticketCode: text("ticket_code").notNull().unique(),
+
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  orderItemId: integer("order_item_id").references(() => orderItems.id, {
+    onDelete: "set null",
+  }),
+
+  productId: integer("product_id").references(() => products.id, {
+    onDelete: "set null",
+  }),
+
+  /** Who the ticket is for (from the shipping details at checkout). */
+  attendeeName: text("attendee_name").notNull(),
+  email: text("email").notNull(),
+
+  /** Ticket face value / the tier line shown on the pass. */
+  eventName: text("event_name").notNull(),
+  eventDate: text("event_date"),
+  venue: text("venue"),
+  tier: text("tier"),
+
+  quantity: integer("quantity").notNull().default(1),
+  unitPrice: integer("unit_price").notNull().default(0),
+
+  /** "valid" | "used" | "cancelled" */
+  status: text("status").notNull().default("valid"),
+
+  /** Set the first time the QR is scanned at the gate. */
+  scannedAt: timestamp("scanned_at", { mode: "date" }),
+
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+});
+
+export type IssuedTicket = typeof issuedTickets.$inferSelect;

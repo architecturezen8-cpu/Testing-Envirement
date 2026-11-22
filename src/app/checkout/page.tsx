@@ -168,8 +168,11 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (res.ok && data.orderId) {
         clearCart();
+        const codes = (data.issuedTicketCodes ?? []).join(",");
         router.push(
-          `/checkout/success?orderId=${data.orderId}&number=${data.orderNumber ?? ""}`
+          `/checkout/success?orderId=${data.orderId}&number=${
+            data.orderNumber ?? ""
+          }&tickets=${encodeURIComponent(codes)}`
         );
       } else {
         setErrors({ submit: data.error || "Checkout failed. Please try again." });

@@ -49,6 +49,8 @@ export default function AdminTicketsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
   const fetchTickets = () => {
     setLoading(true);
@@ -72,6 +74,7 @@ export default function AdminTicketsPage() {
     setEditingId(null);
     setDraft(EMPTY);
     setError("");
+    setUploadedUrl(null);
   };
 
   const openEdit = (t: Product) => {
@@ -161,6 +164,31 @@ export default function AdminTicketsPage() {
     fetchTickets();
   };
 
+  const uploadArtwork = async (file: File) => {
+    if (!editingId) {
+      setError("Save the ticket first, then upload the artwork.");
+      return;
+    }
+    setUploading(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("productId", String(editingId));
+      const res = await fetch("/api/admin/tickets/image", { method: "POST", body: fd });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Upload failed");
+      setUploadedUrl(d.url);
+      setDraft((prev) => (prev ? { ...prev } : prev));
+      flash("Artwork uploaded ✓");
+      fetchTickets();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const toggleTier = (t: string) => {
     if (!draft) return;
     setDraft({
@@ -219,6 +247,64 @@ export default function AdminTicketsPage() {
               <p className="mt-1 text-sm text-stone-400">
                 These fields become the printed ticket on the storefront.
               </p>
+
+              {/* ---- Ticket artwork ---- */}
+              <div className="mt-6 rounded-xl border border-white/12 bg-white/[0.03] p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-950">
+                  Ticket artwork
+                </p>
+                <p className="mt-1 text-sm text-stone-400">
+                  Upload the finished ticket design. Leave an empty{" "}
+                  <span className="text-ink">white square</span> where the QR code should go — it is
+                  detected automatically and the buyer&apos;s QR is drawn there.
+                </p>
+
+                {editingId ? (
+                  <div className="mt-4 flex flex-wrap items-center gap-4">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-cta-accent px-5 py-2.5 text-xs font-semibold text-accent-ink">
+                      {uploading ? "Uploading…" : "Upload image"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) uploadArtwork(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {uploadedUrl && (
+                      <span className="text-xs text-green-700">Artwork saved ✓</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-xs text-stone-400">
+                    Save the ticket once, then upload the artwork here.
+                  </p>
+                )}
+
+                {uploadedUrl && (
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={uploadedUrl}
+                      alt="Ticket artwork preview"
+                      className="h-40 rounded-lg border border-white/12 object-contain"
+                    />
+                    <div className="max-w-xs text-xs text-stone-400">
+                      <p className="font-medium text-stone-950">QR placement</p>
+                      <p className="mt-1">
+                        The storefront scans this image for the largest white square and paints the
+                        buyer&apos;s QR over it, with a small scene behind the code.
+                      </p>
+                      <p className="mt-2">
+                        No white square? The QR falls back to the right-hand stub.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">

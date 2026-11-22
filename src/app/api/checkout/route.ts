@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { orders, orderItems, discountCodes, products, productVariants } from "@/db/schema";
+import { orders, orderItems, discountCodes, products, productVariants, issuedTickets } from "@/db/schema";
 import { eq, sql, inArray, and } from "drizzle-orm";
 import { getUserSession } from "@/lib/user-auth";
+import { generateTicketCode, qrPayload, makeQrDataUrl } from "@/lib/tickets";
+import { sendTicketEmail } from "@/lib/mailer";
 
 const checkoutSchema = z.object({
   items: z.array(
@@ -111,6 +113,35 @@ export async function POST(request: Request) {
     }
   }
 
+  // ---- Ticket metadata for the event-ticket lines in this order ----
+  const ticketRows = await db
+    .select({
+      id: products.id,
+      name: products.name,
+      category: products.category,
+      description: products.description,
+    })
+    .from(products)
+    .where(inArray(products.id, productIds));
+
+  const ticketProductIds = new Set(
+    ticketRows.filter((r) => r.category === "Event Tickets").map((r) => r.id)
+  );
+
+  const ticketMeta = new Map(
+    ticketRows.map((r) => [
+      r.id,
+      {
+        name: r.name,
+        eventDate: r.description.split("Event: ")[1]?.split("\n")[0] ?? null,
+        venue: r.description.split("Venue: ")[1]?.split("\n")[0] ?? null,
+        tier: r.description.split("Tier: ")[1]?.split("\n")[0] ?? "General",
+      },
+    ])
+  );
+
+  const issuedCodes: string[] = [];
+
   try {
     const [order] = await db.transaction(async (tx) => {
       const [created] = await tx
@@ -137,17 +168,87 @@ export async function POST(request: Request) {
           .where(eq(discountCodes.code, discountCode.toUpperCase()));
       }
 
-      await tx.insert(orderItems).values(
-        items.map((item) => ({
-          orderId: created.id,
-          productId: item.productId,
-          name: item.name,
-          price: item.price,
-          size: item.size,
-          color: item.color,
-          quantity: item.quantity,
-        }))
+      const insertedItems = await tx
+        .insert(orderItems)
+        .values(
+          items.map((item) => ({
+            orderId: created.id,
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            size: item.size,
+            color: item.color,
+            quantity: item.quantity,
+          }))
+        )
+        .returning();
+
+      // ---- Issue one ticket per event-ticket line item ----
+      // Only lines whose product is an Event Ticket get a QR pass; clothing
+      // lines are fulfilled physically and need none.
+      const ticketLines = insertedItems.filter((item) =>
+        ticketProductIds.has(item.productId)
       );
+
+      const issuedPasses: {
+        ticketCode: string;
+        eventName: string;
+        eventDate: string;
+        venue: string;
+        tier: string;
+        attendeeName: string;
+        quantity: number;
+        qr: string;
+      }[] = [];
+
+      for (const line of ticketLines) {
+        const meta = ticketMeta.get(line.productId);
+        const ticketCode = generateTicketCode();
+        const payload = qrPayload(ticketCode);
+        const qr = await makeQrDataUrl(payload);
+
+        await tx.insert(issuedTickets).values({
+          ticketCode,
+          orderId: created.id,
+          orderItemId: line.id,
+          productId: line.productId,
+          attendeeName: shipping.fullName,
+          email: created.email,
+          eventName: meta?.name ?? line.name,
+          eventDate: meta?.eventDate ?? null,
+          venue: meta?.venue ?? null,
+          tier: meta?.tier ?? "General",
+          quantity: line.quantity,
+          unitPrice: line.price,
+          status: "valid",
+        });
+
+        issuedCodes.push(ticketCode);
+        issuedPasses.push({
+          ticketCode,
+          eventName: meta?.name ?? line.name,
+          eventDate: meta?.eventDate ?? "",
+          venue: meta?.venue ?? "",
+          tier: meta?.tier ?? "General",
+          attendeeName: shipping.fullName,
+          quantity: line.quantity,
+          qr,
+        });
+      }
+
+      // ---- Email the tickets (best effort; never blocks the order) ----
+      if (issuedPasses.length) {
+        try {
+          await sendTicketEmail({
+            to: created.email,
+            orderNumber: created.number,
+            buyerName: shipping.fullName,
+            tickets: issuedPasses,
+          });
+        } catch (e) {
+          console.error("[checkout] ticket email failed", e);
+        }
+      }
 
       // ---- Decrement stock for each ordered item ----
       // Variant stock is the source of truth; product total is re-derived from it
@@ -180,7 +281,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { orderId: order.id, orderNumber: order.number },
+      {
+        orderId: order.id,
+        orderNumber: order.number,
+        // The buyer is sent straight to their passes when the order
+        // contained event tickets.
+        issuedTicketCodes: issuedCodes,
+      },
       { status: 201 }
     );
   } catch (error) {
