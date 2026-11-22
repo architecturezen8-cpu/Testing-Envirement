@@ -203,6 +203,21 @@ export async function POST(request: Request) {
 
       for (const line of ticketLines) {
         const meta = ticketMeta.get(line.productId);
+
+        // The chosen tier IS the quantity. The storefront sends it as the size,
+        // e.g. "2 Tickets", "Family Pass (6 people)" or "10 tickets" — the cart
+        // quantity stays 1 because the tier carries the count.
+        const size = line.size || "";
+        const countMatch = size.match(/(\d+)/);
+        const people =
+          countMatch && Number(countMatch[1]) > 0
+            ? Number(countMatch[1])
+            : Math.max(1, line.quantity);
+        const tierLabel =
+          size.startsWith("Family") && people
+            ? `Family Pass · ${people} people`
+            : size || meta?.tier || "General";
+
         const ticketCode = generateTicketCode();
         const payload = qrPayload(ticketCode);
         const qr = await makeQrDataUrl(payload);
@@ -217,8 +232,8 @@ export async function POST(request: Request) {
           eventName: meta?.name ?? line.name,
           eventDate: meta?.eventDate ?? null,
           venue: meta?.venue ?? null,
-          tier: meta?.tier ?? "General",
-          quantity: line.quantity,
+          tier: tierLabel,
+          quantity: people,
           unitPrice: line.price,
           status: "valid",
         });
@@ -229,9 +244,9 @@ export async function POST(request: Request) {
           eventName: meta?.name ?? line.name,
           eventDate: meta?.eventDate ?? "",
           venue: meta?.venue ?? "",
-          tier: meta?.tier ?? "General",
+          tier: tierLabel,
           attendeeName: shipping.fullName,
-          quantity: line.quantity,
+          quantity: people,
           qr,
         });
       }
