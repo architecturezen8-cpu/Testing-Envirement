@@ -15,8 +15,16 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className, onQuickView }: ProductCardProps) {
-  const firstImage = product.images[0] ?? "/images/hero.jpg";
-  const secondImage = product.images[1] ?? firstImage;
+  // Event tickets show a reference thumbnail in the grid (uploaded separately
+  // from the printed ticket artwork, which the QR is drawn onto).
+  const isTicket = product.category === "Event Tickets";
+  const thumbnail = (product as { thumbnail?: string | null }).thumbnail ?? null;
+  const firstImage = isTicket
+    ? (thumbnail ?? product.images[0] ?? "/images/hero.jpg")
+    : (product.images[0] ?? "/images/hero.jpg");
+  const secondImage = isTicket
+    ? (thumbnail ?? product.images[1] ?? firstImage)
+    : (product.images[1] ?? firstImage);
   const onSale =
     product.compareAtPrice && product.compareAtPrice > product.price;
   const inStock = product.inStock !== false;

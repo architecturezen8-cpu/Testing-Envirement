@@ -21,6 +21,7 @@ import { BadgeCheck } from "lucide-react";
 import type { Product, Review, ProductVariant } from "@/db/schema";
 
 interface ProductDetailData {
+  thumbnail?: string | null;
   product: Product & { collectionName: string | null; collectionSlug: string | null };
   reviews: Review[];
   variants: ProductVariant[];
@@ -219,6 +220,7 @@ function ProductPageInner() {
             {isTicket ? (
               <div className="space-y-6">
                 <TicketCard
+                  thumbnail={data.thumbnail ?? null}
                   eventTitle={product.name}
                   date={product.description.split("Event: ")[1]?.split("\n")[0] ?? "Date to be announced"}
                   venue={product.description.split("Venue: ")[1]?.split("\n")[0] ?? "College grounds"}

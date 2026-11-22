@@ -67,7 +67,7 @@ function buildHtml(params: {
                         letter-spacing:2px;text-transform:uppercase;">
                 ${t.tier || "General"} &#183; Admit ${t.quantity}
               </p>
-              <p style="margin:8px 0 0;font:600 19px Georgia,serif;color:#f9fafb;line-height:1.3;">
+              <p style="margin:8px 0 0;font:600 17px Arial, Helvetica, sans-serif;color:#f9fafb;line-height:1.3;">
                 ${t.eventName}
               </p>
               <p style="margin:6px 0 0;font:400 13px Arial,sans-serif;color:#6b7280;">
@@ -76,7 +76,7 @@ function buildHtml(params: {
               <p style="margin:10px 0 0;font:400 13px Arial,sans-serif;color:#9ca3af;">
                 <span style="color:#f4be38;">&#9679;</span> ${t.attendeeName}
               </p>
-              <p style="margin:4px 0 0;font:600 15px 'Courier New',monospace;color:#f9fafb;
+              <p style="margin:4px 0 0;font:600 15px Arial, Helvetica, sans-serif;color:#f9fafb;
                         letter-spacing:1px;">
                 ${t.ticketCode}
               </p>
@@ -94,7 +94,7 @@ function buildHtml(params: {
                  style="display:inline-block;margin-top:12px;padding:11px 22px;
                         background:#f4be38;color:#0a0b0f;text-decoration:none;
                         border-radius:999px;font:700 11px Arial,sans-serif;
-                        letter-spacing:1.5px;text-transform:uppercase;">
+                        letter-spacing:1px;text-transform:uppercase;">
                 Download ticket &#8595;
               </a>
             </td>
@@ -120,12 +120,12 @@ function buildHtml(params: {
                 <img src="cid:college-crest" alt="College crest" width="66" height="66"
                      style="display:block;margin:0 auto;border-radius:50%;
                             background:#ffffff;padding:6px;" />
-                <p style="margin:14px 0 0;font:600 20px Georgia,serif;color:#f9fafb;
-                          letter-spacing:3px;">
+                <p style="margin:14px 0 0;font:600 20px Arial,Helvetica,sans-serif;color:#f9fafb;
+                          letter-spacing:1px;">
                   ST. THOMAS&#39; COLLEGE
                 </p>
                 <p style="margin:6px 0 0;font:400 11px Arial,sans-serif;color:#6b7280;
-                          letter-spacing:2.5px;">
+                          letter-spacing:1.2px;">
                   MATALE &#183; EST. 1873
                 </p>
               </td>
@@ -136,7 +136,7 @@ function buildHtml(params: {
                 <p style="margin:0 0 6px;font:400 13px Arial,sans-serif;color:#6b7280;">
                   Hi ${buyerName},
                 </p>
-                <h1 style="margin:0 0 12px;font:400 26px Georgia,serif;color:#f9fafb;
+                <h1 style="margin:0 0 12px;font:400 26px Arial,Helvetica,sans-serif;color:#f9fafb;
                            line-height:1.25;">
                   Your tickets are confirmed
                 </h1>
@@ -155,7 +155,7 @@ function buildHtml(params: {
                 <a href="${site}/account/tickets"
                    style="display:inline-block;padding:12px 24px;border-radius:999px;
                           border:1px solid #f4be38;color:#f4be38;text-decoration:none;
-                          font:700 11px Arial,sans-serif;letter-spacing:1.5px;
+                          font:700 11px Arial,sans-serif;letter-spacing:1px;
                           text-transform:uppercase;">
                   All my tickets
                 </a>
@@ -166,7 +166,7 @@ function buildHtml(params: {
                     +94 66 222 0173
                   </a>
                 </p>
-                <p style="margin:8px 0 0;font:italic 12px Georgia,serif;color:#4b5563;">
+                <p style="margin:8px 0 0;font:italic 12px Arial,Helvetica,sans-serif;color:#4b5563;">
                   &ldquo;Animo Et Fide&rdquo; &mdash; Courage &amp; Faith
                 </p>
               </td>

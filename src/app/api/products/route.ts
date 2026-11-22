@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { products, collections } from "@/db/schema";
+import { products, collections, ticketThumbnails } from "@/db/schema";
 import { and, asc, desc, eq, gte, ilike, lte, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -97,5 +97,15 @@ export async function GET(request: NextRequest) {
     ? await dbQuery.limit(Number(limit))
     : await dbQuery;
 
-  return NextResponse.json(result);
+  // Event tickets carry a reference thumbnail (the photo shoppers see in the
+  // grid) that is separate from the printed ticket artwork.
+  const thumbs = await db.select().from(ticketThumbnails);
+  const thumbById = new Map(thumbs.map((t) => [t.productId, t.imageUrl]));
+
+  return NextResponse.json(
+    result.map((p) => ({
+      ...p,
+      thumbnail: thumbById.get(p.id) ?? null,
+    })),
+  );
 }
