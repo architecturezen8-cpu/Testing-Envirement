@@ -143,6 +143,54 @@ production than a personal Gmail account, which has a ~500 messages/day limit.
 | `SMTP_PASS` | App password |
 | `SMTP_FROM` | From-header shown to the buyer |
 
+## Local setup troubleshooting
+
+### Admin "Event Tickets" section missing
+
+The section lives at `/admin/tickets` and appears in the admin sidebar. If it
+is not there:
+
+1. **Pull the latest code** — the section was added after the first release:
+
+   ```bash
+   git pull origin main
+   ```
+
+2. **Clear the Next.js cache** — a stale `.next` folder keeps serving the old
+   client bundle, which is what draws the sidebar:
+
+   ```bash
+   rmdir /s /q .next        # Windows
+   rm -rf .next             # macOS / Linux
+   npm run build
+   npm run start
+   ```
+
+3. **Hard-refresh the browser** (`Ctrl+Shift+R`) — the admin sidebar is drawn
+   by JavaScript, so an old cached bundle will not show the new link.
+
+4. Confirm the file exists in your clone:
+
+   ```
+   src/app/admin/(dashboard)/tickets/page.tsx
+   ```
+
+If it is there and the build succeeds, `/admin/tickets` will work. Note the
+admin section **is separate** from "Products" — tickets are created under
+**Event Tickets** in the sidebar, with the event name, date, venue and tier
+fields.
+
+### Why your local catalogue can differ from the preview
+
+Code comes from git; **data lives in the database**. If `DATABASE_URL` points
+at a local Postgres, you will see whatever that database holds. Point it at
+the same Supabase database used by the preview and both environments show the
+same catalogue. After pulling code that changed the seed, re-run:
+
+```bash
+npx tsx src/db/seed-school.ts
+```
+
 ## Design system
 
 - **Midnight theme** — charcoal canvas (`#0f141f`), dark navy accents used
