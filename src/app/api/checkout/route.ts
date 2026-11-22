@@ -5,6 +5,7 @@ import { orders, orderItems, discountCodes, products, productVariants, issuedTic
 import { eq, sql, inArray, and } from "drizzle-orm";
 import { getUserSession } from "@/lib/user-auth";
 import { generateTicketCode, qrPayload, makeQrDataUrl } from "@/lib/tickets";
+import { renderTicketPass } from "@/lib/ticket-pass";
 import { sendTicketEmail } from "@/lib/mailer";
 
 const checkoutSchema = z.object({
@@ -120,12 +121,18 @@ export async function POST(request: Request) {
       name: products.name,
       category: products.category,
       description: products.description,
+      images: products.images,
     })
     .from(products)
     .where(inArray(products.id, productIds));
 
   const ticketProductIds = new Set(
     ticketRows.filter((r) => r.category === "Event Tickets").map((r) => r.id)
+  );
+
+  /** Ticket artwork (images[0]) per product, used for the rendered pass. */
+  const ticketArtwork = new Map(
+    ticketRows.map((r) => [r.id, r.images?.[0] ?? null]),
   );
 
   const ticketMeta = new Map(
@@ -198,7 +205,9 @@ export async function POST(request: Request) {
         tier: string;
         attendeeName: string;
         quantity: number;
-        qr: string;
+        seat: number;
+        seats: number;
+        pass: string;
       }[] = [];
 
       for (const line of ticketLines) {
@@ -218,37 +227,60 @@ export async function POST(request: Request) {
             ? `Family Pass · ${people} people`
             : size || meta?.tier || "General";
 
-        const ticketCode = generateTicketCode();
-        const payload = qrPayload(ticketCode);
-        const qr = await makeQrDataUrl(payload);
+        // One ticket per person, each with its own scannable QR. Buying "4
+        // Tickets" gives four separate passes so four people can enter
+        // independently instead of one code being reused at the gate.
+        for (let seat = 1; seat <= people; seat++) {
+          const ticketCode = generateTicketCode();
 
-        await tx.insert(issuedTickets).values({
-          ticketCode,
-          orderId: created.id,
-          orderItemId: line.id,
-          productId: line.productId,
-          attendeeName: shipping.fullName,
-          email: created.email,
-          eventName: meta?.name ?? line.name,
-          eventDate: meta?.eventDate ?? null,
-          venue: meta?.venue ?? null,
-          tier: tierLabel,
-          quantity: people,
-          unitPrice: line.price,
-          status: "valid",
-        });
+          await tx.insert(issuedTickets).values({
+            ticketCode,
+            orderId: created.id,
+            orderItemId: line.id,
+            productId: line.productId,
+            attendeeName: shipping.fullName,
+            email: created.email,
+            eventName: meta?.name ?? line.name,
+            eventDate: meta?.eventDate ?? null,
+            venue: meta?.venue ?? null,
+            tier: tierLabel,
+            quantity: 1,
+            unitPrice: Math.round(line.price / people),
+            status: "valid",
+          });
 
-        issuedCodes.push(ticketCode);
-        issuedPasses.push({
-          ticketCode,
-          eventName: meta?.name ?? line.name,
-          eventDate: meta?.eventDate ?? "",
-          venue: meta?.venue ?? "",
-          tier: tierLabel,
-          attendeeName: shipping.fullName,
-          quantity: people,
-          qr,
-        });
+          issuedCodes.push(ticketCode);
+
+          // Render the printable pass (uploaded artwork with the QR composited
+          // over its white square, or a typographic pass without artwork).
+          const pass = await renderTicketPass(
+            {
+              ticketCode,
+              eventName: meta?.name ?? line.name,
+              eventDate: meta?.eventDate ?? null,
+              venue: meta?.venue ?? null,
+              tier: tierLabel,
+              attendeeName: shipping.fullName,
+              status: "valid",
+            },
+            ticketArtwork.get(line.productId) ?? null,
+          ).catch(() =>
+            makeQrDataUrl(qrPayload(ticketCode)).then((qr) => qr.replace("data:image/png;base64,", "")),
+          );
+
+          issuedPasses.push({
+            ticketCode,
+            eventName: meta?.name ?? line.name,
+            eventDate: meta?.eventDate ?? "",
+            venue: meta?.venue ?? "",
+            tier: tierLabel,
+            attendeeName: shipping.fullName,
+            quantity: 1,
+            seat,
+            seats: people,
+            pass: `data:image/png;base64,${pass.toString("base64")}`,
+          });
+        }
       }
 
       // ---- Email the tickets (best effort; never blocks the order) ----

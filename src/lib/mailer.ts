@@ -16,7 +16,8 @@ type Ticket = {
   tier: string;
   attendeeName: string;
   quantity: number;
-  qr: string;
+  /** Full ticket pass (artwork + QR composited), as a data URL. */
+  pass: string;
 };
 
 function transport() {
@@ -71,8 +72,11 @@ export async function sendTicketEmail({
           </p>
         </td>
         <td style="padding:14px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-          <img src="${t.qr}" alt="QR ${t.ticketCode}" width="120" height="120"
-               style="display:inline-block;border:1px solid #e5e7eb;border-radius:6px;" />
+          <img src="${t.pass}" alt="Ticket ${t.ticketCode}" width="180"
+               style="display:inline-block;border:1px solid #e5e7eb;border-radius:8px;" />
+          <p style="margin:6px 0 0;font:400 10px Arial,sans-serif;color:#6b7280;">
+            Show this at the gate
+          </p>
         </td>
       </tr>`,
     )
@@ -94,7 +98,7 @@ export async function sendTicketEmail({
         </p>
         <table style="width:100%;border-collapse:collapse;">${rows}</table>
         <p style="margin:24px 0 0;font:400 12px Arial,sans-serif;color:#9ca3af;">
-          Each QR code is unique to your booking and can be scanned once. Please don't share it.
+          Each ticket carries a unique QR code and can be scanned once. Please don't share it.
         </p>
       </div>
     </div>

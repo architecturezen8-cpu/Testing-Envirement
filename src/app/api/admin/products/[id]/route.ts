@@ -30,6 +30,9 @@ const productUpdateSchema = z.object({
   badge: z.string().optional().nullable().transform((v) => (v?.trim() ? v.trim() : null)),
   offerActive: z.boolean().default(false),
   offerLabel: z.string().optional().nullable().transform((v) => (v?.trim() ? v.trim() : null)),
+  /** Stock to seed on every variant of a ticket product (tickets have no
+   *  colours, so the per-combination model does not apply). */
+  stock: z.number().int().min(0).optional(),
 });
 
 export async function GET(
@@ -77,7 +80,7 @@ export async function PUT(
 
   try {
     const productId = Number(id);
-    const { sizes, colors, ...productFields } = parsed.data;
+    const { sizes, colors, stock, ...productFields } = parsed.data;
 
     // Fetch existing variants so we can preserve their stock when sizes/colors haven't changed
     const existingVariants = await db
@@ -138,9 +141,21 @@ export async function PUT(
           productId,
           size: c.size,
           color: c.color,
-          stock: 0,
+          // Ticket tiers inherit the stock the admin entered; clothing starts
+          // at 0 until stock is set per variant.
+          stock: stock ?? 0,
         }))
       );
+    }
+
+    // When the admin sets an explicit stock, it applies to every variant of the
+    // product — tickets especially, where "200 available" is one number rather
+    // than a per-combination value.
+    if (typeof stock === "number") {
+      await db
+        .update(productVariants)
+        .set({ stock })
+        .where(eq(productVariants.productId, productId));
     }
 
     // Recalculate total stock from all variants (single source of truth)

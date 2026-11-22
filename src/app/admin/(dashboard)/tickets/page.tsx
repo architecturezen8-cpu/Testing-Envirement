@@ -25,6 +25,8 @@ type TicketDraft = {
   badge: string;
   tiers: string[];
   stock: number;
+  /** The ticket's existing artwork, preserved across edits. */
+  images: string[];
 };
 
 const EMPTY: TicketDraft = {
@@ -38,6 +40,7 @@ const EMPTY: TicketDraft = {
   badge: "",
   tiers: ["1 Ticket", "2 Tickets", "Family Pass", "Custom"],
   stock: 200,
+  images: [],
 };
 
 export default function AdminTicketsPage() {
@@ -93,6 +96,7 @@ export default function AdminTicketsPage() {
       badge: t.badge ?? "",
       tiers: t.sizes?.length ? t.sizes : ["1 Ticket"],
       stock: t.stock,
+      images: t.images ?? [],
     });
     setError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -132,7 +136,8 @@ export default function AdminTicketsPage() {
               gender: "Unisex",
               sizes: draft.tiers,
               colors: [],
-              images: ["/images/school-3.jpg"],
+              // Preserve the uploaded artwork — this is what the QR is drawn on.
+              images: draft.images.length ? draft.images : ["/images/school-3.jpg"],
               stock: draft.stock,
               inStock: draft.stock > 0,
               badge: draft.badge || null,
@@ -187,6 +192,9 @@ export default function AdminTicketsPage() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error ?? "Upload failed");
       setUploadedUrl(d.url);
+      setDraft((prev) =>
+        prev ? { ...prev, images: [d.url, ...prev.images.filter((i) => i !== d.url)] } : prev,
+      );
       setPendingFile(null);
       flash("Artwork uploaded ✓");
       fetchTickets();

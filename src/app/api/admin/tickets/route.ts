@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { products, productVariants } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { z } from "zod";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq, sql, and } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +70,27 @@ export async function GET(request: NextRequest) {
   if (auth instanceof Response) return auth;
 
   const tickets = await db
-    .select()
+    .select({
+      id: products.id,
+      name: products.name,
+      slug: products.slug,
+      description: products.description,
+      price: products.price,
+      compareAtPrice: products.compareAtPrice,
+      category: products.category,
+      gender: products.gender,
+      sizes: products.sizes,
+      colors: products.colors,
+      images: products.images,
+      stock: sql<number>`(
+        select coalesce(min(v.stock), products.stock)
+        from product_variants v
+        where v.product_id = products.id
+      )::int`,
+      inStock: products.inStock,
+      badge: products.badge,
+      createdAt: products.createdAt,
+    })
     .from(products)
     .where(eq(products.category, "Event Tickets"))
     .orderBy(desc(products.createdAt));
