@@ -6,6 +6,8 @@ import { eq, sql, inArray, and } from "drizzle-orm";
 import { getUserSession } from "@/lib/user-auth";
 import { generateTicketCode, qrPayload, makeQrDataUrl } from "@/lib/tickets";
 import { renderTicketPass } from "@/lib/ticket-pass";
+import sharp from "sharp";
+import { getCrestPng } from "@/lib/crest";
 import { sendTicketEmail } from "@/lib/mailer";
 
 const checkoutSchema = z.object({
@@ -299,6 +301,7 @@ export async function POST(request: Request) {
           orderNumber: created.number,
           buyerName: shipping.fullName,
           tickets: issuedPasses,
+          crestPng: await getCrestPng(),
         }).catch((e) =>
           console.error("[checkout] ticket email failed:", e.message),
         );

@@ -215,6 +215,9 @@ export function Header() {
                           <p className="text-sm font-medium text-ink">{user.name}</p>
                           <p className="truncate text-xs text-stone-500">{user.email}</p>
                         </div>
+                        <Link href="/account/tickets" className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-ink/10">
+                          My tickets
+                        </Link>
                         <Link href="/account" className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-ink/10">
                           My orders
                         </Link>
@@ -403,7 +406,7 @@ export function Header() {
                     className="flex items-center gap-3 border-b border-ink/8 py-3.5 text-base text-ink"
                   >
                     <UserIcon className="h-[18px] w-[18px] text-stone-400" />
-                    {user ? "My orders" : "Sign in"}
+                    {user ? "My tickets" : "Sign in"}
                   </Link>
                 </li>
                 <li>

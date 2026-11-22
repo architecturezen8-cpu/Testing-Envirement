@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { products, reviews, collections, productVariants } from "@/db/schema";
+import { products, reviews, collections, productVariants, ticketThumbnails } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -60,5 +60,16 @@ export async function GET(
     .from(productVariants)
     .where(eq(productVariants.productId, product.id));
 
-  return NextResponse.json({ product, reviews: productReviews, variants });
+  // Reference thumbnail for ticket products (photo shown in shop grids)
+  let thumbnail: string | null = null;
+  if (product.category === "Event Tickets") {
+    const [thumb] = await db
+      .select({ imageUrl: ticketThumbnails.imageUrl })
+      .from(ticketThumbnails)
+      .where(eq(ticketThumbnails.productId, product.id))
+      .limit(1);
+    thumbnail = thumb?.imageUrl ?? null;
+  }
+
+  return NextResponse.json({ product, reviews: productReviews, variants, thumbnail });
 }

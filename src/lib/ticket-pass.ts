@@ -65,9 +65,8 @@ async function findWhiteSquare(
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
-    return (
-      r > 225 && g > 225 && b > 225 && Math.abs(r - g) < 12 && Math.abs(g - b) < 12
-    );
+    // Strict: a genuinely blank white area, not a light-grey print artefact.
+    return r > 235 && g > 235 && b > 235 && Math.abs(r - g) < 8 && Math.abs(g - b) < 8;
   };
 
   let bestArea = 0;
@@ -197,9 +196,11 @@ export async function renderTicketPass(
   ticket: PassTicket,
   artworkUrl: string | null | undefined,
 ): Promise<Buffer> {
+  // margin 0: the white square in the artwork already provides padding, so
+  // the code fills 80% of the detected square rather than shrinking further.
   const qrBuffer = await QRCode.toBuffer(qrCodePayload(ticket.ticketCode), {
     errorCorrectionLevel: "M",
-    margin: 2,
+    margin: 0,
     width: 420,
     color: { dark: "#0b1220", light: "#ffffff" },
   });
@@ -220,9 +221,10 @@ export async function renderTicketPass(
       // Take the smaller of the square's two dimensions (so a tall thin block
       // still yields a square QR) and keep a little padding around it.
       const fitSize = Math.min(square.width, square.height);
+      // 80% of the square, leaving visible padding around the code.
       const qrSize = Math.max(
-        96,
-        Math.round(fitSize * 0.82),
+        72,
+        Math.round(fitSize * 0.8),
       );
 
       // Clamp to the artwork bounds.

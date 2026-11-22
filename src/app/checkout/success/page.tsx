@@ -65,7 +65,13 @@ function SuccessContent() {
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-xs text-stone-400">
+          <Link
+            href="/account/tickets"
+            className="mt-4 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide-2 text-accent transition-colors hover:text-ink"
+          >
+            View all my tickets →
+          </Link>
+          <p className="mt-2 text-xs text-stone-400">
             Copies were also emailed to you.
           </p>
         </div>
