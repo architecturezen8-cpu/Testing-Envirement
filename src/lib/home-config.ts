@@ -22,6 +22,8 @@ export type Testimonial = {
   quote: string;
   author: string;
   role: string;
+  /** Star rating shown with the quote (defaults to 5). */
+  stars?: number;
   sourceReviewId?: number | null;
 };
 
@@ -66,7 +68,15 @@ function coerce(value: unknown): HomeConfig {
     featuredProductIds: Array.isArray(r.featuredProductIds)
       ? r.featuredProductIds.filter((n) => typeof n === "number")
       : [],
-    testimonials: Array.isArray(r.testimonials) ? r.testimonials : [],
+    testimonials: Array.isArray(r.testimonials)
+      ? r.testimonials.map((t) => ({
+          ...t,
+          stars:
+            typeof t.stars === "number" && t.stars >= 1 && t.stars <= 5
+              ? Math.round(t.stars)
+              : 5,
+        }))
+      : [],
     navLinks: Array.isArray(r.navLinks) ? r.navLinks : [],
   };
 }

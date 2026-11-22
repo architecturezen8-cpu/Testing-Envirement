@@ -29,18 +29,21 @@ const TESTIMONIAL_FALLBACK = [
       "The quality of the college merchandises is outstanding — the crest embroidery is beautiful and the fit is perfect.",
     author: "Dinesh P.",
     role: "Old Boys' Union",
+    stars: 5,
   },
   {
     quote:
       "Ordered event tickets and a polo set for the big match. Everything arrived quickly and beautifully packed.",
     author: "Nimesha R.",
     role: "Parent, Grade 9",
+    stars: 5,
   },
   {
     quote:
       "Wearing the college colours feels different when it is made this well. Proud to be a Thomian.",
     author: "Sanula W.",
     role: "Student, Grade 13",
+    stars: 5,
   },
 ];
 
@@ -204,8 +207,8 @@ export default async function HomePage() {
               <StaggerItem key={t.author} className="h-full">
                 <div className="flex h-full flex-col rounded-2xl border border-ink/8 bg-paper bg-sheen-light ring-1 ring-inset ring-panel p-8">
                   <div className="mb-4 flex gap-0.5 text-accent">
-                    {"★★★★★".split("").map((s, i) => (
-                      <span key={i}>{s}</span>
+                    {Array.from({ length: Math.max(1, Math.min(5, t.stars ?? 5)) }).map((_, i) => (
+                      <span key={i}>★</span>
                     ))}
                   </div>
                   <p className="flex-1 font-serif text-lg font-light leading-relaxed text-ink/80">
